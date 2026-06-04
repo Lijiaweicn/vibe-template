@@ -5,49 +5,71 @@ paths:
   - "!**/*.test.ts"
 ---
 
-# 编码规范 - 核心架构层
+# 编码规范 - 领域层
 
 ## 一、核心分层与数据流向
 
-`constants → api → services(index.ts) → models → view`
+`constants → domainModels → sceneModels → index.ts (sceneServices) → view`
 
-- **constants**：业务字典，无逻辑
-- **models**：纯函数，语义增强，不发请求，不改原数据
-- **services**：异步请求 + 调用 models 组合 + 上抛
-- **views**：仅渲染，无业务判定
+## 二、命名规范
 
-## 二、模型层与服务层约束
+| 类型     | 命名                      | 示例                |
+| -------- | ------------------------- | ------------------- |
+| 常量     | `{domain}Constants`       | `quoteConstants`    |
+| 领域事实 | `{domain}Models`          | `quoteModels`       |
+| 场景模型 | `{domain}{Scene}Models`   | `quoteFormModels`   |
+| 场景服务 | `{domain}{Scene}Services` | `quoteFormServices` |
 
-1. **无 `this`**：models 和 services 中的函数必须是纯函数，禁止使用 `this`
-2. **零响应式依赖**：领域层禁止引入 `ref/reactive/useState` 等响应式 API
-3. **动态联动**：高频联动通过视图层的 computed 动态调用模型工厂
+## 三、表单场景约束
 
-## 三、常量字典约束
+- `formData`：100% 对应后端字段
+- `formContext`：交互状态（`statusCtx`、`uiContext`）
+- ❌ 禁止将 UI 状态混入 `formData`
 
-- 中文字符串/状态映射必须收拢到 `constants.ts`
-- 对象字典结尾加 `as const`，同时推导类型和 Options 数组
+**参考：** `@.claude/samples/quote-form-models.ts`
 
-## 四、模型分级
+## 四、领域事实约束
 
-- **领域事实（common/models）**：跨页面通用的基础计算、状态翻译
-- **场景事实（local/models）**：特定页面的显隐、禁用、保存判定
-- 场景事实调用通用模型，禁止重写底层逻辑
+- 输入原子值，输出增强值
+- 只能导入 `{domain}Constants`
+- ❌ 禁止依赖接口结构
+- ❌ 禁止 `this`、禁止响应式 API
 
-## 五、命名与导出
+**参考：** `@.claude/samples/quote-common-models.ts`
 
-- 主工厂统一命名：`createXxxContext`（如 `createFormContext`）
-- 主工厂返回完整上下文（业务数据 + uiContext 合一）
-- `index.ts` 底部统一导出：`export { xxxServices, xxxModels }`
+## 五、场景模型约束
 
-## 六、架构熔断（防止过度设计）
+- 调用领域事实组装 Context
+- ❌ 禁止重写底层通用逻辑
 
-极简页面（纯静态、无显隐、无联动、无计算）允许：
+**参考：** `@.claude/samples/quote-form-models.ts`
 
-1. 不创建 `models.ts`
-2. services 直接返回 API 的 rawData
-3. 视图层使用可选链防御
+## 六、常量层约束
 
-⚠️ **一旦增加任何显隐或联动，立即重构为标准三级架构**
+- 对象字典必须加 `as const`
+- 同时导出类型和选项数组
+- ❌ 禁止缺少 `as const`
+
+**参考：** `@.claude/samples/quote-constants.ts`
+
+## 七、服务层约束
+
+- 服务层位于 `index.ts`
+- `index.ts` 底部统一导出 services 和 models
+- ❌ 禁止单独创建 `services.ts`
+
+**参考：** `@.claude/samples/quote-form-index.ts`
+
+## 八、视图层消费规范
+
+- **表单场景**：解构 `{ formData, formContext }`
+- **其他场景**：直接使用返回的 Context
+- ❌ 禁止模板中写业务判断
+- ❌ 禁止可选链防御链
+
+## 九、架构熔断
+
+极简页面允许熔断标准架构，但增加显隐/联动后必须重构。
 
 ## 参考样板
 

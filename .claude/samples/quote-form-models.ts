@@ -75,7 +75,7 @@ function checkCanSave(data: QuoteFormData): boolean {
 /**
  * 表单初始化工厂：确保组件挂载第一秒，数据和状态骨架都是完备的
  */
-function createInitialFormStructure(): {
+function initFormData(): {
   formData: QuoteFormData;
   formContext: QuoteFormContext;
 } {
@@ -85,13 +85,13 @@ function createInitialFormStructure(): {
     remark: "",
     products: [],
   };
-  return createFormModuleStructure(defaultData, { isEdit: false });
+  return createFormData(defaultData, { isEdit: false });
 }
 
 /**
  * 表单双驱核心转换器：吞噬任何原始数据与环境参数，输出绝对隔离的 formData 与 formContext
  */
-function createFormModuleStructure(
+function createFormData(
   raw: Partial<QuoteFormData> = {},
   options: { isEdit?: boolean } = {},
 ): { formData: QuoteFormData; formContext: QuoteFormContext } {
@@ -125,8 +125,8 @@ function createFormModuleStructure(
 }
 
 const quoteFormModels = {
-  createInitialFormStructure,
-  createFormModuleStructure,
+  initFormData,
+  createFormData,
 };
 
 export { quoteFormModels };

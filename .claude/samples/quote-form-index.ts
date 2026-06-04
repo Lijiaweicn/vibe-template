@@ -51,7 +51,7 @@ async function getDetail(
   const rawData = await fetchRemoteQuoteDetail(id);
 
   // b. 扔进 Form 专用的双驱工厂，将其彻底分拆为纯净数据（formData）与交互上下文（formContext）
-  return quoteFormModels.createFormModuleStructure(rawData, { isEdit: true });
+  return quoteFormModels.createFormData(rawData, { isEdit: true });
 }
 
 /**
@@ -65,23 +65,12 @@ async function saveForm(formData: QuoteFormData): Promise<any> {
   }).then((res) => res.json());
 }
 
-/**
- * 核心调度：表单初始响应式数据安全骨架工厂（挂在服务层下，供页面初次加载无参调用）
- */
-function createInitialFormData(): {
-  formData: QuoteFormData;
-  formContext: QuoteFormContext;
-} {
-  return quoteFormModels.createInitialFormStructure();
-}
-
 // ==========================================
 // 2. 局部封装服务对象（内部组件化包装）
 // ==========================================
 const quoteFormServices = {
   getDetail,
   saveForm,
-  createInitialFormData,
 };
 
 // ==========================================
