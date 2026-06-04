@@ -1,0 +1,24 @@
+{
+  "allowedCommands": [
+    "pnpm test",
+    "pnpm test:unit",
+    "pnpm run test",
+    "pnpm run lint",
+    "npm run test",
+    "npm run lint",
+    "git status",
+    "git diff"
+  ],
+  "blockedCommands": [
+    "rm -rf /*",
+    "git push",
+    "npm publish",
+    "pnpm publish"
+  ],
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.pnpm-store/**",
+    "**/dist/**",
+    "**/coverage/**"
+  ]
+}
