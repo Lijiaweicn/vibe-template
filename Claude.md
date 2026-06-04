@@ -1,20 +1,30 @@
-# 项目全局开发上下文与最高行动指南
-
-## ⚠️ AI 行为绝对红线（必读）
-
-在本项目中执行任何代码查看、重写、重构、测试或 Git 操作之前，你必须无条件先加载、阅读并严格遵守 `.claude/rules/` 目录下的所有子规范文件。
-
-当你接受开发指令时，请自觉对齐以下分包规则：
-
-1. 涉及系统架构分层与 Vue3/React 代码组织，严格执行 -> `.claude/rules/01-architecture.md`
-2. 涉及代码本地暂存与 Commit 消息编写，严格执行 -> `.claude/rules/02-git-workflow.md`
-3. 涉及单元测试运行与自动化质量卡口，严格执行 -> `.claude/rules/03-testing-ci.md`
-4. 涉及历史技术债与特定大客户业务防护，严格执行 -> `.claude/rules/04-business-trap.md`
-
+---
+paths:
+  - "**/*"
 ---
 
-## 项目背景概览
+# 核心原则
 
-- **核心业务**：复杂的企业级管理系统（包含燃料采购、招投标、工作流审计等）。
-- **技术现状**：核心系统正从 Vue 2 混合架构全面向现代化的现代流（Vue 3 / React + TypeScript + Node 20 + pnpm）迁移。
-- **核心逻辑引擎**：项目深度依赖一种“注册表（Registry）”设计模式，通过统一的 `LogicHub` 引擎处理复杂的业务规则审查。
+1. 视图不包含业务逻辑
+2. 显隐逻辑统一管理
+3. 业务逻辑必须可测试
+
+# 目录结构
+
+详见 `.claude/rules/project.md`
+
+# 编码规范
+
+详见 `.claude/rules/coding.md`
+
+# 视图规范
+
+详见 `.claude/rules/views.md`
+
+# 工作流程
+
+详见 `.claude/rules/workflow.md`
+
+# 测试规范
+
+详见 `.claude/rules/testing.md`
