@@ -16,6 +16,7 @@
 ### 1. 准备分支
 
 从计划文档路径提取需求编号和任务名，创建本地分支：
+
 - 多任务：`docs/plans/UAC-123/01-用户列表.md` → `local/UAC-123-01-用户列表`
 - 单任务：`docs/plans/UAC-123/README.md` → `local/UAC-123`
 
@@ -46,6 +47,7 @@ git branch -D local/<需求编号>-<任务名>
 ### 6. 需求总结（所有 plan 完成后）
 
 检查 README.md，所有计划都完成后：
+
 1. 追加完成总结和变更文件汇总
 2. 生成 PR commit 信息草稿供用户调整
 3. 确认后执行 `git commit`
