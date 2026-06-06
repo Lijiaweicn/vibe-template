@@ -27,6 +27,8 @@ Claude Code 项目工作流配置试验项目。
 │   ├── vbp-create.md    # 计划创建工作流
 │   ├── vbp-execute.md   # 计划执行工作流
 │   └── vbp-archive.md   # 计划归档工作流
+├── commands/
+│   └── codegraph.md     # /codegraph 命令（run|update|status）
 └── samples/
     ├── quote-constants.ts
     ├── quote-common-models.ts
@@ -69,6 +71,14 @@ Claude Code 项目工作流配置试验项目。
 | vbp-create | 输入需求描述，自动分析并生成规划文档 |
 | vbp-execute | 基于计划文档驱动本地开发（分支管理、状态更新、需求总结） |
 | vbp-archive | 处理已完成的需求计划（删除/移动/保留） |
+
+### commands
+
+Slash 命令：
+
+| 文件 | 说明 |
+|------|------|
+| codegraph.md | `/codegraph [run\|update\|status]` - CodeGraph 操作 |
 
 ### samples
 
