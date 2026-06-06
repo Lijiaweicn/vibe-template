@@ -8,8 +8,7 @@
 
 ## 模式
 
-- **有 superpowers**：调用 `superpowers:writing-plans` 生成基础计划，应用 rules/plan.md 约束（移除代码块、保留设计决策）
-- **无 superpowers**：使用 vbw 内置逻辑
+使用 vbw 内置逻辑生成规划文档，遵循 `rules/plan.md` 的模板和约束（不调用 superpowers:writing-plans，避免生成代码再删除的浪费）。
 
 ## 流程
 

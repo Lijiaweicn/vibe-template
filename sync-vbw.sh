@@ -12,7 +12,8 @@ fi
 
 mkdir -p "$TARGET_DIR/rules" "$TARGET_DIR/skills"
 cp "$SOURCE_DIR/.claude/rules/plan.md" "$TARGET_DIR/rules/"
-cp "$SOURCE_DIR/.claude/skills/vbw-plan.md" "$TARGET_DIR/skills/"
-cp "$SOURCE_DIR/.claude/skills/vbw-task.md" "$TARGET_DIR/skills/"
+cp "$SOURCE_DIR/.claude/skills/vbp-create.md" "$TARGET_DIR/skills/"
+cp "$SOURCE_DIR/.claude/skills/vbp-execute.md" "$TARGET_DIR/skills/"
+cp "$SOURCE_DIR/.claude/skills/vbp-archive.md" "$TARGET_DIR/skills/"
 
 echo "vbw 已同步到 $TARGET_DIR/"
