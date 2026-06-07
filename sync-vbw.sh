@@ -10,11 +10,10 @@ if [ ! -d "$SOURCE_DIR/.claude" ]; then
     exit 1
 fi
 
-mkdir -p "$TARGET_DIR/rules" "$TARGET_DIR/skills" "$TARGET_DIR/commands"
+mkdir -p "$TARGET_DIR/rules" "$TARGET_DIR/skills/vbp-create" "$TARGET_DIR/skills/vbp-execute" "$TARGET_DIR/commands"
 cp "$SOURCE_DIR/.claude/rules/plan.md" "$TARGET_DIR/rules/"
-cp "$SOURCE_DIR/.claude/skills/vbp-create.md" "$TARGET_DIR/skills/"
-cp "$SOURCE_DIR/.claude/skills/vbp-execute.md" "$TARGET_DIR/skills/"
-cp "$SOURCE_DIR/.claude/skills/vbp-archive.md" "$TARGET_DIR/skills/"
+cp "$SOURCE_DIR/.claude/skills/vbp-create/SKILL.md" "$TARGET_DIR/skills/vbp-create/"
+cp "$SOURCE_DIR/.claude/skills/vbp-execute/SKILL.md" "$TARGET_DIR/skills/vbp-execute/"
 cp "$SOURCE_DIR/.claude/commands/codegraph.md" "$TARGET_DIR/commands/"
 
 echo "vbw 已同步到 $TARGET_DIR/"

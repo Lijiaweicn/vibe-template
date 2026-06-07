@@ -24,9 +24,10 @@ Claude Code 项目工作流配置试验项目。
 │   ├── workflow.md      # 工作流规范（Git提交、行为红线、Code Review清单）
 │   └── testing.md       # 单元测试规范（测试分级、示例）
 ├── skills/
-│   ├── vbp-create.md    # 计划创建工作流
-│   ├── vbp-execute.md   # 计划执行工作流
-│   └── vbp-archive.md   # 计划归档工作流
+│   ├── vbp-create/
+│   │   └── SKILL.md     # 计划创建工作流
+│   └── vbp-execute/
+│       └── SKILL.md     # 计划执行工作流
 ├── commands/
 │   └── codegraph.md     # /codegraph 命令（run|update|status）
 └── samples/
@@ -66,11 +67,10 @@ Claude Code 项目工作流配置试验项目。
 
 ### skills
 
-| 文件 | 说明 |
+| 目录 | 说明 |
 |------|------|
-| vbp-create | 输入需求描述，自动分析并生成规划文档 |
-| vbp-execute | 基于计划文档驱动本地开发（分支管理、状态更新、需求总结） |
-| vbp-archive | 处理已完成的需求计划（删除/移动/保留） |
+| vbp-create/ | 输入需求描述，自动分析并生成规划文档 |
+| vbp-execute/ | 基于计划文档驱动本地开发（分支管理、状态更新、需求总结） |
 
 ### commands
 
@@ -130,13 +130,12 @@ sync-vbw
 
 1. 查找任务：读取 README.md，找到第一个非 done 任务
 2. 准备分支：创建 `local/` 分支
-3. 检查中断记录：有则询问是否继续，无则直接开始
+3. 检查未解决的问题：有则询问是否继续，无则直接开始
 4. 执行任务：按 Todo 列表逐项执行，每项完成后更新状态
-5. 遇阻塞：填写中断记录，提示用户
+5. 遇阻塞：填写未解决的问题，提示用户
 6. 验收：用户确认通过后继续
 7. 完成合并：squash merge 到 feature 分支
 8. 更新状态：标记计划完成
-9. 归档提示：所有任务 done 后提示可归档
 
 ### vbp-archive（计划归档）
 
