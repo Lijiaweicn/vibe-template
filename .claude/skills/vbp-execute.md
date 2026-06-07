@@ -15,8 +15,7 @@
 ### 2. 准备分支
 
 从计划文档路径提取需求编号和任务名，创建本地分支：
-- 多任务：`docs/plans/UAC-123/01-用户列表.md` → `local/UAC-123-01-用户列表`
-- 单任务：`docs/plans/UAC-123/README.md` → `local/UAC-123`
+- 示例：`docs/plans/UAC-123/01-用户列表.md` → `local/UAC-123-01-用户列表`
 
 ### 3. 检查未解决的问题
 
