@@ -1,0 +1,24 @@
+{
+  "name": "Vibe-Demo-Sandbox",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/workspace,type=bind",
+    "source=${localEnv:USERPROFILE}/.claude,target=/home/node/.claude,type=bind",
+    "source=${localEnv:USERPROFILE}/.claude/settings.json,target=/home/node/.claude.json,type=bind"
+  ],
+  "workspaceFolder": "/workspace",
+  "containerEnv": {
+    "GIT_SSH_COMMAND": "echo '[🔒 安全拦截] 容器内禁止直接 Push，请在 Windows 本地执行 Git 推送！' && false"
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh"
+      }
+    },
+    "jetbrains": {
+      "backend": "WebStorm"
+    }
+  }
+}
