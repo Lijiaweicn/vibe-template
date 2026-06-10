@@ -9,15 +9,14 @@ paths:
 2. 显隐逻辑统一管理
 3. 业务逻辑必须可测试
 
-# 规划规范
+# 工作流程（VBW）
 
-涉及以下情况时，必须先阅读 `.claude/rules/plan.md`：
+新功能开发使用 VBW 工作流程：
 
-- 新功能开发
-- 架构调整
-- 跨模块改造
-- 大规模重构
-- 数据结构变更
+1. **规划**：使用 `vbw-plan` skill 进行需求访谈和任务拆分
+2. **开发**：使用 `vbw-dev` skill 按任务驱动开发
+
+详见 `.claude/skills/vbw-plan/SKILL.md` 和 `.claude/skills/vbw-dev/SKILL.md`
 
 # 目录结构
 
