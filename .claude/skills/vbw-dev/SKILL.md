@@ -13,13 +13,13 @@ description: 开发执行 - 基于任务文档驱动开发，含 review 循环
 
 ## 前置条件
 
-`docs/` 目录下存在已规划的需求文档（由 vbw-plan 生成）。
+`docs/feature/` 目录下存在已规划的需求文档（由 vbw-plan 生成）。
 
 ## 流程
 
 ### 1. 定位任务
 
-读取 `docs/<需求标识>/README.md`，找到第一个未完成的任务：
+读取 `docs/feature/README.md`，找到第一个未完成的任务：
 - 快速通道：查找 README 中未完成的 Todo 项（`- [ ]`）
 - 完整流程：查找任务引用或 task 文件中未完成的 Todo 项
 
