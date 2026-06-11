@@ -9,7 +9,7 @@ description: 开发执行 - 基于任务文档驱动开发，含 review 循环
 
 ## 触发条件
 
-用户要求开始开发时触发，或用户明确要求"vbw-dev"。
+通过 Skill 工具调用（`vbw-dev`）。规划完成后由 vbw-plan 输出引导调用。
 
 ## 前置条件
 
@@ -52,6 +52,8 @@ git checkout -b local/<需求标识>-task-N
 3. 完成后更新为 `- [x]`
 4. 继续下一项，直到全部完成
 
+**代码搜索**：查找已有模块、组件、接口时，优先使用 CodeGraph；不可用时回退到 Grep/Glob/Read。
+
 开发过程中：
 - 可随时 `git commit`（WIP 提交）
 - 可调整 Todo 列表（添加/删除/修改步骤）
@@ -59,7 +61,7 @@ git checkout -b local/<需求标识>-task-N
 
 ### 5. 验证清单自检
 
-所有 Todo 完成后，squash merge 前进行自检：
+所有 Todo 完成后，squash merge 前进行自检（以下清单来自 workflow.md，已在上下文中可用）：
 
 - [ ] 所有 Todo 项已标记 `[x]`
 - [ ] 待确认/待解决已清空或归档到已确认
