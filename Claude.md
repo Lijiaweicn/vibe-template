@@ -1,8 +1,3 @@
----
-paths:
-  - "**/*"
----
-
 # 核心原则
 
 1. 视图不包含业务逻辑
@@ -11,29 +6,21 @@ paths:
 
 # 工作流程（VBW）
 
-新功能开发使用 VBW 工作流程：
+新功能开发使用 VBW 工作流程，通过 Skill 工具调用：
 
-1. **规划**：使用 `vbw-plan` skill 进行需求访谈和任务拆分
-2. **开发**：使用 `vbw-dev` skill 按任务驱动开发
+1. **规划**：`vbw-plan` — 需求访谈和任务拆分
+2. **开发**：`vbw-dev` — 任务驱动开发
 
-详见 `.claude/skills/vbw-plan/SKILL.md` 和 `.claude/skills/vbw-dev/SKILL.md`
+# Tools
 
-# 目录结构
+代码搜索、符号查找、调用链追踪 → CodeGraph 可用时必须使用，不可用时回退到 Grep/Read。
 
-详见 `.claude/rules/project.md`
+# Rules
 
-# 编码规范
+以下规则按需自动加载，无需手动读取：
 
-详见 `.claude/rules/coding.md`
-
-# 视图规范
-
-详见 `.claude/rules/views.md`
-
-# 工作流程
-
-详见 `.claude/rules/workflow.md`
-
-# 测试规范
-
-详见 `.claude/rules/testing.md`
+- `project.md` — 目录结构、技术栈
+- `coding.md` — domains编码规范
+- `views.md` — 视图规范
+- `workflow.md` — Git 提交、Code Review 清单
+- `testing.md` — 测试规范
