@@ -13,13 +13,12 @@
 slots:
   # 阶段 1：需求探索 — 通过访谈明确需求
   explore:
-    skill: vbw/explore
+    skill: brainstorming   # superpowers 的协作式需求收集
     builtin: vbw/explore
 
   # 增强：假设质疑（在 explore 信息收集完成后触发）
-  # 外部推荐：grill-me
   challenge:
-    skill: null     # 安装 grill-me 后改为 grill-me
+    skill: grill-me        # 对抗式假设质疑
     builtin: vbw/explore
 
   # 阶段 2：需求产出 — 生成 README + task 文件骨架
