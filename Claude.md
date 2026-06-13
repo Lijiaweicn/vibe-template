@@ -8,8 +8,8 @@
 
 新功能开发使用 VBW 工作流程，通过 Skill 工具调用：
 
-1. **规划**：`vbw-plan` — 需求访谈和任务拆分
-2. **开发**：`vbw-dev` — 任务驱动开发
+- **完整流程**：`vbw` — 从需求规划到开发验收的完整编排
+- **插槽扩展**：编辑 `.claude/skills/vbw/config.yaml` 可替换各阶段的执行 skill
 
 # Tools
 

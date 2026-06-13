@@ -1,0 +1,60 @@
+# VBW 插槽配置
+# 每个 slot 对应流程中的一个阶段
+#
+# 解析规则（编排层执行）：
+#   1. 读取 skill 字段，尝试调用该 skill
+#   2. 如果 skill 未安装或调用失败，降级到 builtin
+#   3. 如果 skill 和 builtin 都是同一个，直接执行 builtin
+#
+# 扩展方式：
+#   - 安装外部 skill（如 grill-me），然后修改对应 slot 的 skill 字段
+#   - 将 skill 设为 null 可跳过该增强，直接用 builtin
+
+slots:
+  # 阶段 1：需求探索 — 通过访谈明确需求
+  explore:
+    skill: vbw/explore
+    builtin: vbw/explore
+
+  # 增强：假设质疑（在 explore 信息收集完成后触发）
+  # 外部推荐：grill-me
+  challenge:
+    skill: null     # 安装 grill-me 后改为 grill-me
+    builtin: vbw/explore
+
+  # 阶段 2：需求产出 — 生成 README + task 文件骨架
+  specify:
+    skill: vbw/specify
+    builtin: vbw/specify
+
+  # 阶段 3：任务深化 — 深化讨论 + 交叉验证
+  validate:
+    skill: vbw/validate
+    builtin: vbw/validate
+
+  # 增强：设计决策质疑（在 validate 深化讨论中触发）
+  # 外部推荐：improve-codebase-architecture
+  challenge-design:
+    skill: null     # 安装后改为 improve-codebase-architecture
+    builtin: vbw/validate
+
+  # 阶段 4：逐项开发 — 按 TODO 驱动开发
+  implement:
+    skill: vbw/implement
+    builtin: vbw/implement
+
+  # 增强：TDD 驱动（在 implement 逐项开发中触发）
+  # 外部推荐：tdd
+  tdd:
+    skill: null     # 安装 tdd 后改为 tdd
+    builtin: vbw/implement
+
+  # 阶段 5：代码审查 — 自检 + 规范对齐
+  review:
+    skill: vbw/review
+    builtin: vbw/review
+
+  # 阶段 6：人工验收 — 用户逐项确认（不可配置）
+  accept:
+    skill: vbw/accept
+    builtin: vbw/accept
