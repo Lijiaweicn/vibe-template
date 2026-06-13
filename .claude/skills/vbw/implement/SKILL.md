@@ -43,6 +43,8 @@ description: 逐项开发 - 按任务逐个深化、TDD 开发、自检、验收
    - 标记为 `[x]`
 2. 继续下一项，直到全部完成
 
+**测试标准**：写测试时遵循 `.claude/rules/testing.md`（测试分级、BDD 风格、参数化测试要求）。
+
 **TDD 豁免**：TODO 项可标记 `[no-tdd]` 跳过测试（如纯 UI 样式调整、配置变更、文档更新）。未标记的默认走 TDD。
 
 **代码搜索**：查找已有模块、组件、接口时，优先使用 CodeGraph；不可用时回退到 Grep/Glob/Read。
@@ -65,7 +67,7 @@ description: 逐项开发 - 按任务逐个深化、TDD 开发、自检、验收
 
 - [ ] 所有 TODO 项已标记 `[x]`
 - [ ] 待解决已清空或全部转化为已确定
-- [ ] 符合 `workflow.md` Code Review 清单：
+- [ ] 符合 `.claude/rules/code-reviews.md` 清单：
   - [ ] models 是纯函数（无 `this`、无响应式 API）
   - [ ] 常量已收拢到 `constants.ts` 并加了 `as const`
   - [ ] 表单场景：`formData` 不含 UI 属性（UI 属性已放 `uiContext`）
@@ -76,7 +78,7 @@ description: 逐项开发 - 按任务逐个深化、TDD 开发、自检、验收
 
 自检通过后，启动一个新的 agent 进行交叉审查：
 - 注入干净上下文（无开发过程的历史对话）
-- 提供 coding 规范（`coding.md`、`view.md`、`workflow.md`）和本轮变更的文件列表
+- 提供 coding 规范（`.claude/rules/domains-code.md`、`.claude/rules/views.md`、`.claude/rules/code-reviews.md`）和本轮变更的文件列表
 - 新 agent 处于"聪明区"，能发现因上下文疲劳而忽略的边缘 Bug
 - 审查结果：通过 → 继续；有问题 → 修复后重新自检
 

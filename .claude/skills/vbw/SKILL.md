@@ -28,7 +28,7 @@ specify 只产出骨架（README + task 文件），不强制深化所有细节�
 
 1. **流程顺序**：必须按阶段顺序执行，不可跳过
 2. **产出物规范**：
-   - README 必须包含：需求标识、需求背景、核心功能、任务列表
+   - README 必须包含：需求标识、核心功能、任务列表
    - task 文件必须包含：depends（依赖声明）、验收清单、TODO
 3. **质量门禁**：每个阶段产出物必须满足门禁条件才能进入下一阶段
 4. **依赖解析**：执行任务前必须检查 depends，前置任务未完成不能开始
@@ -78,13 +78,13 @@ challenge:
 **内置实现**（`vbw/specify`）：
 - 从分支名提取需求标识
 - 创建 `docs/feature/` 目录和 README.md
-- 填充需求背景和核心功能
+- 填充核心功能概述
 - 拆分任务（垂直切片优先），生成 task 文件
 - task 的 TODO 可以是粗粒度的，待深化的内容写入"待解决"
 
 **门禁条件**：
 - [ ] README.md 包含需求标识（头部 `> 需求标识: ...`）
-- [ ] README.md 包含需求背景、核心功能、任务列表三个节
+- [ ] README.md 包含核心功能、任务列表两个节
 - [ ] 每个 task 文件包含 depends + 验收清单 + TODO
 - [ ] 任务拆分符合垂直切片原则（每个任务是独立可验证的功能增量）
 
@@ -147,7 +147,7 @@ challenge:
 
 - [ ] 所有 TODO 项已标记 `[x]`
 - [ ] 待解决已清空或全部转化为已确定
-- [ ] 符合 `workflow.md` Code Review 清单：
+- [ ] 符合 `.claude/rules/code-reviews.md` 清单：
   - [ ] models 是纯函数（无 `this`、无响应式 API）
   - [ ] 常量已收拢到 `constants.ts` 并加了 `as const`
   - [ ] 表单场景：`formData` 不含 UI 属性（UI 属性已放 `uiContext`）
@@ -158,7 +158,7 @@ challenge:
 
 自检通过后，启动一个新的 agent 进行交叉审查：
 - 注入干净上下文（无开发过程的历史对话）
-- 提供 coding 规范（`coding.md`、`view.md`、`workflow.md`）和本轮变更的文件列表
+- 提供 coding 规范（`.claude/rules/domains-code.md`、`.claude/rules/views.md`、`.claude/rules/code-reviews.md`）和本轮变更的文件列表
 - 新 agent 处于"聪明区"，能发现因上下文疲劳而忽略的边缘 Bug
 - 审查结果：通过 → 继续；有问题 → 修复后重新自检
 
@@ -203,7 +203,7 @@ challenge:
 
 1. **需求级一致性检查**：
    - [ ] 每个 task 的已确定内容与实际代码一致
-   - [ ] README 描述的需求背景和核心功能全部被任务覆盖
+   - [ ] README 描述的核心功能全部被任务覆盖
 
 2. **填写总结**：在 README.md 的总结区域填写成果提炼
    - 实现了什么功能

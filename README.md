@@ -19,9 +19,9 @@ Claude Code 项目工作流配置试验项目。
 ├── rules/
 │   ├── plan.md          # 规划文档规范
 │   ├── project.md       # 项目信息（技术栈、目录规范、历史遗留坑点）
-│   ├── coding.md        # 领域层编码规范（分层、命名、约束）
-│   ├── view.md          # 视图层规范（组件存放、提取原则、模板约束）
-│   ├── workflow.md      # 工作流规范（Git提交、行为红线、Code Review清单）
+│   ├── domains-code.md   # 领域层编码规范（分层、命名、约束）
+│   ├── views.md         # 视图层规范（组件存放、提取原则、模板约束）
+│   ├── git.md           # Git 提交规范、行为红线
 │   └── testing.md       # 单元测试规范（测试分级、示例）
 ├── skills/
 │   ├── vbp-create/
@@ -60,9 +60,9 @@ Claude Code 项目工作流配置试验项目。
 | ----------- | ------------------------------------------------ | ------------------------------------- |
 | plan.md     | 规划文档规范                                     | 所有文件                              |
 | project.md  | 项目信息、目录规范、历史遗留坑点                 | 所有文件                              |
-| coding.md   | 领域层编码规范（分层、命名、约束）               | domains/\*_/_.ts                      |
-| view.md     | 视图层规范（组件存放、模板约束）                 | views/**/\*.vue、components/**/\*.vue |
-| workflow.md | 工作流规范（Git提交、行为红线、Code Review清单） | 所有文件                              |
+| domains-code.md | 领域层编码规范（分层、命名、约束）               | packages/\*_/_.ts                      |
+| views.md    | 视图层规范（组件存放、模板约束）                 | views/**/\*.vue、components/**/\*.vue |
+| git.md | Git 提交规范、行为红线 | 所有文件                              |
 | testing.md  | 单元测试规范（测试分级、示例）                   | _.test.ts、_.spec.ts                  |
 
 ### skills

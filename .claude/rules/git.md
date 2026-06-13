@@ -20,15 +20,3 @@ paths:
 1. **允许**：阶段性多次 commit，测试全绿后打包提交
 2. **禁止**：AI 擅自执行 `git push`（必须由人类审查后手动推送）
 3. **禁止**：AI 擅自 `git push --force`
-
-## Code Review 清单（AI 自检）
-
-**所有项必须标记 `[x]` 才能交付。**
-
-- [ ] models 是纯函数（无 `this`、无响应式 API）
-- [ ] 常量已收拢到 `constants.ts` 并加了 `as const`
-- [ ] 表单场景：`formData` 不含 UI 属性（UI 属性已放 `uiContext`）
-- [ ] 视图模板：无复杂表达式（如 `v-if="a && b"`）
-- [ ] 视图模板：无可选链防御链（如 `data?.xxx`）
-
-**如任一项不通过，修复后再交付。**
