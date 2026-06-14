@@ -1,47 +1,39 @@
 ---
 paths:
-  - "**/*.test.ts"
-  - "**/*.spec.ts"
+  - "**/*.test.{js,ts}"
+  - "**/*.spec.{js,ts}"
 ---
 
-# 单元测试规范
+> 完整规范见 [docs/spec/project.md](../../docs/spec/project.md) 3.1.8，本文为自动加载的精简版。
 
-## 核心原则
-
-测试价值 = 逻辑复杂度 × 变更频率 × 影响范围
+# 单元测试规范（精简版）
 
 ## 测试分级
 
-- **P0（必须测）**：多字段聚合、canSave、needApproval、uiContext 显隐分支
-  - 必须使用参数化测试（`test.each`/`it.each`）
-- **P1（建议测）**：中等复杂的表单校验
-- **P2/P3（严禁测）**：纯单项映射、常量枚举
+测试价值 = 逻辑复杂度 × 变更频率 × 影响范围。不追求覆盖率。
 
-## BDD 风格
+| 级别 | 范围 | 要求 |
+| --- | --- | --- |
+| P0（必须测） | 多字段聚合、`canSave`、`needApproval`、`uiContext` 显隐分支 | `test.each` 参数化 |
+| P1（建议测） | 中等复杂的表单校验、customers 策略合并 | 按需覆盖 |
+| P2/P3（不测） | 纯单项映射、常量枚举 | 无需测试 |
 
-`describe/it` 的描述应贴近用户行为语言，而非纯实现细节。测试既是开发的反馈循环，也是验收的自动化映射。
+## 关键规则
 
-```typescript
-// 好 — 贴近验收清单的行为描述
-describe("报价表单", () => {
-  it("输入非法邮箱后点击保存，应显示红色错误提示", () => { ... })
-})
-
-// 差 — 纯实现细节，看不出在测什么行为
-describe("validateEmail", () => {
-  it("should return false for invalid email", () => { ... })
-})
-```
+- 测试文件与被测文件同目录（`models.test.ts` 与 `models.ts` 同级）
+- BDD 风格：`describe/it` 描述贴近用户行为，非实现细节
+- P0 必须用 `test.each` / `it.each` 参数化测试
+- services 测试可 mock `apis`
 
 ## 示例
 
 ```typescript
-describe("canSave", () => {
+describe("报价表单保存条件", () => {
   it.each([
-    { form: { items: [{}], total: 100 }, expected: true },
-    { form: { items: [], total: 100 }, expected: false },
-  ])("应返回 $expected", ({ form, expected }) => {
-    expect(models.canSave(form)).toBe(expected);
+    { desc: "有商品且金额>0", formData: { items: [{ price: 100, quantity: 1 }] }, expected: true },
+    { desc: "无商品", formData: { items: [] }, expected: false },
+  ])("$desc → $expected", ({ formData, expected }) => {
+    expect(models.canSave(formData)).toBe(expected);
   });
 });
 ```
