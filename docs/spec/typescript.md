@@ -1,7 +1,7 @@
 # TypeScript 编码规范
 
-> **版本**：v1.0
-> **配套文档**：[project.md](./project.md)（业务架构规范）
+> **版本**：v1.1
+> **配套文档**：[project.md](./project.md)（业务架构规范，v4.0 统一垂直结构）
 
 ---
 
@@ -17,14 +17,16 @@ TS 在本项目中的核心使命：**增强核心资产的健壮性、提供高
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  核心架构层 = domains/(含 shared/) + utils/ + stores/    │
+│  核心架构层 = views/**/core/ + components/shared/**/core/│
+│            + utils/ + stores/                            │
 │  - 策略：严格类型，开启 strict 模式                      │
 │  - 必须声明完整的 interface，确保下游补全体验              │
 └───────────────────────────┬────────────────────────────┘
                             │ 驱动
                             ▼
 ┌────────────────────────────────────────────────────────┐
-│  业务视图层 = views/ + components/ + routes/             │
+│  业务视图层 = views/（core 以外）+ components/common/    │
+│            + components/shared/（core 以外）+ routes/    │
 │  - 策略：弱化类型，依赖自动推导，禁止手写复杂体操          │
 │  - 有初始值的状态信任编译器推导，不加冗余泛型              │
 └────────────────────────────────────────────────────────┘
@@ -65,7 +67,7 @@ TypeScript 的 tsconfig 是**编译单元**，一个 `tsc` 进程只读一个配
     "baseUrl": ".",
     "paths": { "@/*": ["src/*"] }
   },
-  "include": ["src/domains/**/*.ts", "src/utils/**/*.ts", "src/stores/**/*.ts"]
+  "include": ["src/views/**/core/**/*.ts", "src/components/shared/**/core/**/*.ts", "src/utils/**/*.ts", "src/stores/**/*.ts"]
 }
 ```
 
@@ -87,7 +89,7 @@ TypeScript 的 tsconfig 是**编译单元**，一个 `tsc` 进程只读一个配
 | 命令 | 用途 | 检查范围 |
 |------|------|---------|
 | `pnpm typecheck` | 开发时宽松检查 | 全项目，放宽 `noImplicitAny` 和 `strictNullChecks` |
-| `pnpm typecheck:strict` | CI 严格门禁 | 仅 `domains/`、`utils/`、`stores/`，strict 全家桶 |
+| `pnpm typecheck:strict` | CI 严格门禁 | 仅 `views/**/core/`、`components/shared/**/core/`、`utils/`、`stores/`，strict 全家桶 |
 
 > 日常开发用 `typecheck`（宽松，不阻断心流），CI 流水线用 `typecheck:strict`（严格，保护核心层质量）。
 
@@ -101,7 +103,7 @@ TypeScript 的 tsconfig 是**编译单元**，一个 `tsc` 进程只读一个配
 
 ```typescript
 // ✅ 就近：types 和实现放在一起
-// domains/bidding/order/models.ts
+// views/bidding/order/core/models.ts
 export interface StatusContext {
   value: number;
   label: string;
@@ -120,12 +122,12 @@ export function createStatusContext(status: number): StatusContext {
 
 ### 3.3 领域模型类型
 
-`domains/` 层的领域模型（如 `StatusContext`、`FormContext`）不是 API 响应的直接映射，需要手写 interface，放在对应的 `models.ts` 中。
+core 层的领域模型（如 `StatusContext`、`FormContext`）不是 API 响应的直接映射，需要手写 interface，放在对应的 `models.ts` 中。
 
 ### 3.4 customers.js 与 context 类型
 
 ```typescript
-// domains/bidding/order/customers.ts
+// views/bidding/order/core/customers.ts
 import type { OrderFormData } from './models'
 import type { FieldConfig } from './configs'
 
@@ -212,7 +214,7 @@ type UserPreview = Pick<User, 'id' | 'name'>
 
 - [ ] **体操禁令**：视图层是否存在超过3层的条件类型或嵌套映射类型？（必须打平为扁平类型）
 - [ ] **推导优先**：有初始值的 `ref`/`reactive` 是否被加了冗余泛型？
-- [ ] **核心层严格**：`domains/` 下的代码是否具备完整的类型声明？是否有隐式 `any`？
+- [ ] **核心层严格**：`core/` 下的代码是否具备完整的类型声明？是否有隐式 `any`？
 - [ ] **unknown 优先**：不确定类型时是否用了 `unknown` 而非 `any`？
 
 ---
@@ -222,7 +224,7 @@ type UserPreview = Pick<User, 'id' | 'name'>
 | 场景 | 做法 |
 |------|------|
 | API 响应类型 | 有工具链时自动生成，否则就近手写 |
-| 领域模型类型 | 就近手写，在 `domains/` 内 |
+| 领域模型类型 | 就近手写，在 `core/` 内 |
 | 简单 ref 有初始值 | 信任推导，不加泛型 |
 | 含空数组/复杂对象 | 显式声明泛型 |
 | 不确定的类型 | `unknown`，不是 `any` |

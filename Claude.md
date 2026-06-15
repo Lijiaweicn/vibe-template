@@ -20,7 +20,7 @@
 以下规则按需自动加载，无需手动读取：
 
 - `project.md` — 目录结构、技术栈
-- `domains-code.md` — domains编码规范
+- `domains-code.md` — core 层编码规范
 - `views.md` — 视图规范
 - `git.md` — Git 提交规范、行为红线
 - `code-review.md` — Code Review 清单

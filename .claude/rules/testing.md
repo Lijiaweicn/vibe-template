@@ -4,7 +4,7 @@ paths:
   - "**/*.spec.{js,ts}"
 ---
 
-> 完整规范见 [docs/spec/project.md](../../docs/spec/project.md) 3.1.8，本文为自动加载的精简版。
+> 完整规范见 [docs/spec/project.md](../../docs/spec/project.md) 5.1，本文为自动加载的精简版。
 
 # 单元测试规范（精简版）
 

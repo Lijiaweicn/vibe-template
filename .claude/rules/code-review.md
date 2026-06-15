@@ -17,7 +17,7 @@ paths:
 - [ ] 视图模板无复杂表达式（如 `v-if="a && b"`）
 - [ ] 视图模板无可选链防御链（如 `data?.xxx`）
 - [ ] services 返回纯对象（不含 `ref`/`reactive`）
-- [ ] 跨领域数据通过 `context` 传入，未直接 import 其他领域 services
+- [ ] 跨场景数据通过 `context` 传入，未直接 import 其他 scene 的 core services
 - [ ] 样式使用 scoped CSS 或 CSS Modules
 - [ ] 视图层无超过3层的条件类型/嵌套映射类型
 - [ ] 不确定类型时用 `unknown` 而非 `any`

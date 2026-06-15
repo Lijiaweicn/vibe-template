@@ -11,8 +11,8 @@ paths:
 
 ## 分层策略
 
-- **核心层**（`domains/`、`utils/`、`stores/`）：strict 模式，完整 interface 声明
-- **视图层**（`views/`、`components/`）：依赖推导，禁止类型体操
+- **核心层**（`views/**/core/`、`components/shared/**/core/`、`utils/`、`stores/`）：strict 模式，完整 interface 声明
+- **视图层**（`views/` core 以外、`components/common/`）：依赖推导，禁止类型体操
 
 ## 红线
 
@@ -23,4 +23,4 @@ paths:
 
 ## 领域模型类型
 
-`domains/` 层的领域模型（`StatusContext`、`FormContext` 等）不是 API 响应的直接映射，就近手写 interface。
+core 层的领域模型（`StatusContext`、`FormContext` 等）不是 API 响应的直接映射，就近手写 interface。

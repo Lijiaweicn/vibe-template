@@ -14,37 +14,60 @@ Vue 3 + TypeScript + Vite | 微前端：wujie | UI：Antdv Next | 包管理：pn
 
 ## 核心原则
 
-1. **业务逻辑集中**：所有业务规则、API 调用、数据转换放在 `domains` 目录
-2. **视图层薄薄一层**：页面只负责模板、交互和调用 services，不写业务判断
-3. **客户差异隔离**：通过 `customers.js` 策略模式管理，禁止 `if (customer === 'A')`
-4. **依赖方向单向**：`domains` 不依赖 `views`；细化场景可依赖基础子域，反之不行
-5. **渐进式落地**：新功能按规范写，老代码不强求全量重构
-6. **架构熔断**：极简页面允许跳过标准架构，增加联动后必须重构
-7. **按需创建**：不创建空文件
+1. **统一垂直结构**：所有垂直领域内部统一为 `core | components | hooks` 三层结构
+2. **业务逻辑就近归属**：业务逻辑放在消费它的领域/场景的 `core/` 目录下
+3. **视图层薄薄一层**：页面只负责模板、交互和调用 services，不写业务判断
+4. **客户差异隔离**：通过 `customers.js` 策略模式管理，禁止 `if (customer === 'A')`
+5. **依赖方向**：`core → hooks → components`（core 不依赖 hooks/components）
+6. **渐进式落地**：新功能按规范写，老代码不强求全量重构
+7. **架构熔断**：极简页面允许跳过标准架构，增加联动后必须重构
+8. **按需创建**：不创建空文件
+
+## 领域层级
+
+- **domain**（业务领域）：bidding、contract、supplier
+- **scene**（业务场景）：order、sign
+- **page**（具体页面）：order-form、order-list、order-detail
 
 ## 目录结构
 
 ```
 src/
-├── domains/                  # 业务核心层（纯逻辑，可独立测试）
-│   ├── shared/               # 跨领域通用业务服务（可被任何领域依赖）
-│   └── {domain}/{sub-domain}/ # 具体领域子域/场景
-├── views/{domain}/{page}/    # 页面视图
-├── components/               # 全局组件（common/ + business/）
-├── routes/                   # 路由层（纯配置）
-├── stores/                   # 全局状态（用户、主题等）
-├── hooks/                    # 全局通用 hooks（无业务依赖）
-└── utils/                    # 工具函数
+├── views/{domain}/
+│   └── {scene}/
+│       ├── {page}.vue              # 页面文件
+│       ├── core/                   # 业务逻辑（models/apis/constants/customers）
+│       │   └── {page}/             # 页面级编排（按需）
+│       ├── components/             # scene 共享组件
+│       └── hooks/                  # scene 共享 hooks
+├── components/
+│   ├── common/                     # 纯 UI
+│   └── shared/{service}/           # 跨领域基础设施
+│       ├── core/
+│       ├── components/
+│       └── hooks/
+├── hooks/                          # 全局通用（无业务依赖）
+├── routes/
+├── stores/
+└── utils/
 ```
+
+## 统一结构
+
+所有垂直领域 = `core | components | hooks`
+
+- 提取方向：`components → hooks → core`
+- 依赖方向：`core → hooks → components`
 
 ## 依赖方向（红线）
 
-- ✅ `domains/{domain}` → `domains/shared/`
-- ✅ `domains/{domain}` → `domains/{same-domain}/{base}`（细化→基础）
-- ✅ `views` → `domains`
-- ❌ `domains` → `views`
-- ❌ `domains/{base}` → `domains/{scene}`（基础→细化）
-- ❌ 跨领域 services 直接 import（通过 `context` 参数传入）
+- ✅ `views/{domain}/{scene}/core/` → `components/shared/*/core/`
+- ✅ page core → scene core（细化→基础）
+- ✅ hooks → core
+- ✅ components → hooks、core
+- ❌ core → hooks、components
+- ❌ 跨场景 core 直接 import（通过 `context` 参数传入）
+- ❌ `components/shared/` → 具体领域
 
 ## 历史遗留坑点
 
