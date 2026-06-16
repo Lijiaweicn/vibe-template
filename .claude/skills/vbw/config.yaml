@@ -41,6 +41,11 @@ slots:
     skill: null     # 安装 tdd 后激活
     builtin: vbw/implement
 
+  # 增强：日志优先诊断（在 implement 验收发现问题时触发）
+  debug:
+    skill: null     # 可挂载外部调试 skill
+    builtin: vbw/debug
+
   # 阶段 4：收尾 — 一致性检查 + 总结
   accept:
     skill: vbw/accept

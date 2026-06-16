@@ -53,6 +53,7 @@ AI 协作开发的前端项目模板，基于三层架构和 VBW 工作流，让
 │       ├── explore/                # 需求探索阶段
 │       ├── specify/                # 需求产出阶段
 │       ├── implement/              # 逐项开发阶段
+│       ├── debug/                  # 日志优先诊断
 │       └── accept/                 # 收尾验收阶段
 ├── commands/
 │   └── codegraph.md                # /codegraph 命令
@@ -61,20 +62,46 @@ AI 协作开发的前端项目模板，基于三层架构和 VBW 工作流，让
 
 ## VBW 工作流
 
-VBW（Vibe-Based Workflow）是从需求规划到开发验收的完整编排流程，通过 Skill 工具触发：
+VBW（Vibe-Based Workflow）是从需求规划到开发验收的完整编排流程。
+
+### 使用方式
+
+**完整流程**（新功能开发）：
+
+```
+/vbw
+```
+
+从阶段 1 开始，走完 explore → specify → implement → accept 全流程。
+
+**单独调用某个阶段**：
+
+```
+/vbw-explore      # 需求探索
+/vbw-specify      # 需求产出
+/vbw-implement    # 逐项开发
+/vbw-accept       # 收尾验收
+/vbw-debug        # 日志优先诊断（验收发现问题时自动触发，也可手动调用）
+```
+
+单独调用适合跳过前序阶段直接进入某个环节，比如已有需求文档时直接 `/vbw-implement` 开始开发。
+
+### 流程阶段
 
 ```
 explore → specify → implement → accept
   需求探索   需求产出   逐项开发   人工验收
+                       ↓ 问题
+                      debug
+                    日志优先诊断
 ```
-
-### 流程阶段
 
 | 阶段 | 目标 | 产出物 |
 |------|------|--------|
 | **explore** | 需求访谈，明确问题和验收标准 | 需求摘要 |
 | **specify** | 生成任务骨架 | README.md + task 文件 |
 | **implement** | 逐项开发、深化、自检 | 功能代码 + 测试 |
+| **debug** | 验收发现问题时，先插桩收集日志再定位修复 | 诊断结果 + 修复 |
 | **accept** | 一致性检查 + 总结 | 验收报告 |
 
 ### 插槽扩展
@@ -99,6 +126,10 @@ slots:
   challenge-design:
     skill: null
     builtin: vbw/implement
+
+  debug:
+    skill: null            # 可挂载外部调试 skill
+    builtin: vbw/debug
 ```
 
 ### 核心纪律
@@ -106,7 +137,8 @@ slots:
 1. **流程顺序**：必须按阶段执行，不可跳过
 2. **阶段转换确认**：每阶段完成后必须暂停，用户确认后方可继续
 3. **依赖解析**：执行任务前检查 `depends`，前置任务未完成不能开始
-4. **循环机制**：验收不通过 → 回到 implement；需求变更 → 回到 explore
+4. **循环机制**：验收不通过 → 走 debug 诊断后回到 implement；需求变更 → 回到 explore
+5. **日志优先**：验收发现问题时，禁止跳过诊断直接改代码
 
 ## 开发规范
 
@@ -180,29 +212,3 @@ slots:
 - `quote-common-models.ts` — 领域事实（纯函数、无依赖）
 - `quote-form-models.ts` — 场景模型（组装 Context）
 - `quote-form-index.ts` — 服务层（统一导出）
-
-## 同步到其他项目
-
-使用 `sync-vbw.sh` 将配置同步到其他项目：
-
-```bash
-# 在目标项目中运行
-/path/to/vibe-template/sync-vbw.sh
-
-# 或指定源目录
-./sync-vbw.sh /path/to/vibe-template
-```
-
-### 添加到 PATH（可选）
-
-在 `~/.bashrc` 或 `~/.zshrc` 中添加：
-
-```bash
-alias sync-vbw="/path/to/vibe-template/sync-vbw.sh"
-```
-
-然后在任意项目中运行：
-
-```bash
-sync-vbw
-```
