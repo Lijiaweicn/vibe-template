@@ -1,10 +1,10 @@
 ---
 paths:
-  - "**/core/**/*.{js,ts}"
+  - "**/domains/**/*.{js,ts}"
   - "!**/*.test.{js,ts}"
 ---
 
-> 完整规范见 [docs/spec/project.md](../../docs/spec/project.md) 第五章，本文为自动加载的精简版。
+> 完整规范见 [docs/spec/project.md](../../docs/spec/project.md) 第六章，本文为自动加载的精简版。
 
 # 领域编码规范（精简版）
 
@@ -38,10 +38,10 @@ constants → models → customers → services(index.js) → view
 |---------|--------|
 | `models.js` 中写客户判断 | 移到 `customers.js` 策略 |
 | services 返回 `ref`/`reactive` | 返回纯对象 |
-| services 直接 import 其他 scene 的 core | 通过 `context` 参数传入 |
+| services 直接 import 其他领域 services | 通过 `context` 参数传入 |
 | 模板中写 `data?.a?.b?.c` 可选链防御 | 由 models 兜底返回默认值 |
-| 基础子域依赖细化场景 | 只能反向依赖 |
+| 基础场景依赖细化场景 | 只能反向依赖 |
 
-## 跨场景依赖
+## 跨领域依赖
 
-场景之间禁止直接引用内部实现，必须通过接口声明依赖。通用服务放 `components/shared/`，任何 scene 的 core 可依赖 `components/shared/`，`shared` 不依赖具体场景。
+领域之间禁止直接引用内部实现，必须通过接口声明依赖。通用服务放 `domains/shared/`，任何领域可依赖 `shared`，`shared` 不依赖具体领域。

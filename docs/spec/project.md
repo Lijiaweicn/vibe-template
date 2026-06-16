@@ -1,7 +1,7 @@
 # 前端业务架构规范
 
-> **版本**：v4.0
-> **目标**：统一垂直领域结构，业务逻辑就近归属，消除认知距离
+> **版本**：v5.0
+> **目标**：按变化频率分层，领域逻辑与视图物理隔离，业务逻辑就近归属
 > **落地方式**：新功能严格遵循，老功能修改时逐步迁移（通过微前端渐进替换）
 > **配套规范**：[typescript.md](./typescript.md)（TypeScript 编码规范）
 
@@ -9,21 +9,45 @@
 
 ## 一、核心原则
 
-1. **统一垂直结构**：所有垂直领域（views 下的 domain/scene/page、components/shared 下的基础设施）内部统一为 `core | components | hooks` 三层结构。
-2. **业务逻辑就近归属**：业务逻辑放在消费它的领域/场景的 `core/` 目录下，不脱离视图独立存在。
+1. **按变化频率分层**：基础设施层（`utils/`）、领域业务层（`domains/`）、应用层（`views/`、`components/`、`hooks/`）三层隔离，各自演进。
+2. **领域逻辑框架无关**：`domains/` 是纯 JS/TS，不依赖 Vue，与 `utils/` 共同构成项目底座。
 3. **视图层薄薄一层**：页面只负责模板、交互和调用 services，不写业务判断。
 4. **客户差异隔离**：通过 `customers.js` 策略模式管理，禁止在通用代码中写 `if (customer === 'A')`。
-5. **提取方向**：`components → hooks → core`（组件中重复逻辑提取为 hooks，hooks 中业务逻辑提取为 core）。
-6. **依赖方向**：`core → hooks → components`（core 不依赖 hooks/components，hooks 可依赖 core，components 可依赖 hooks 和 core）。
+5. **渐进式提取**：随着迭代，从页面中逐步提取组件 → hooks → 领域逻辑，先有血肉再长骨架。
+6. **依赖方向**：应用层 → 领域层 → 基础设施层，反向禁止。
 7. **渐进式落地**：新功能按规范写，老代码不强求全量重构。老模块保留原结构，新模块按本规范在独立子应用中开发，通过微前端（wujie）接入主平台。
 8. **架构熔断**：极简页面（纯展示、无联动）允许跳过标准架构直接写在 views 中，但一旦增加显隐、联动、客户差异等业务逻辑，必须迁移到标准架构。
 9. **按需创建**：不创建空文件，文件内有实际内容时才建立。
 
 ---
 
-## 二、领域层级模型
+## 二、三层架构
 
-项目按 **domain → scene → page** 三层组织：
+```
+变化频率：低 ──────────────────────────────────► 高
+
+┌─────────────┬─────────────────┬─────────────────────────────┐
+│  基础设施层   │   领域业务层     │          应用层              │
+│  utils/      │   domains/      │  views/ components/ hooks/  │
+│              │                 │  routes/ stores/            │
+│  与框架无关   │  与框架无关      │  Vue 强相关                  │
+│  极少变化     │  跟随业务变化    │  跟随需求频繁变化             │
+└─────────────┴─────────────────┴─────────────────────────────┘
+```
+
+| 层级 | 目录 | 职责 | 框架依赖 | 变化频率 |
+| --- | --- | --- | --- | --- |
+| 基础设施层 | `utils/` | 纯工具函数（格式化、深拷贝、请求封装等） | 无 | 极低 |
+| 领域业务层 | `domains/` | 业务规则、API 调用、数据转换、客户策略 | 无 | 中（跟随业务规则） |
+| 应用层 | `views/`、`components/`、`hooks/`、`routes/`、`stores/` | 页面视图、UI 组件、路由、状态管理 | Vue 强相关 | 高（跟随需求） |
+
+**底座**：`utils/` + `domains/` 构成与框架无关的项目底座，可独立测试，不随 UI 框架迁移而改变。
+
+---
+
+## 三、领域层级模型
+
+`views/` 按 **domain → scene → page** 三层组织：
 
 | 层级 | 含义 | 示例 |
 | --- | --- | --- |
@@ -39,146 +63,139 @@ views/bidding/                    # domain（业务领域）
 │   ├── order-form.vue            # page（具体页面）
 │   ├── order-list.vue
 │   ├── order-detail.vue
-│   ├── core/                     # 场景级 + 页面级业务逻辑
-│   ├── components/               # 场景内共享组件
-│   └── hooks/                    # 场景内共享 hooks
+│   ├── components/               # scene 内共享组件
+│   └── hooks/                    # scene 内共享 hooks
 └── ...
 ```
 
 ---
 
-## 三、统一垂直结构
+## 四、渐进式提取路径
 
-所有垂直领域内部遵循统一的三层结构：
-
-```
-{vertical}/
-├── core/           # 业务逻辑层（纯函数，可独立测试）
-├── components/     # 视图组件层
-└── hooks/          # 组合式函数层
-```
-
-### 提取方向与依赖方向
+代码的自然生长节奏：先有页面，再逐步提取可复用部分。
 
 ```
-提取方向（从哪到哪）：components → hooks → core
-  组件中重复逻辑 → 提取为 hooks
-  hooks 中业务逻辑 → 提取为 core
+阶段 1：一个 .vue 文件搞定
+views/bidding/order/order-form.vue
+  ↓ 逻辑多了，提取组件
 
-依赖方向（反过来）：  core → hooks → components
-  core 不依赖 hooks、components
-  hooks 可依赖 core
-  components 可依赖 hooks 和 core
+阶段 2：拆出 components/
+views/bidding/order/
+├── order-form.vue
+└── components/ItemTable.vue
+  ↓ 组件间有共享状态逻辑，提取 hooks
+
+阶段 3：拆出 hooks/
+views/bidding/order/
+├── order-form.vue
+├── components/ItemTable.vue
+└── hooks/useOrderForm.js
+  ↓ hooks 里混了业务规则，提取到 domains
+
+阶段 4：业务规则进入 domains/
+domains/bidding/order/
+├── models.js
+├── apis.js
+├── constants.js
+├── customers.js
+└── index.js
 ```
 
-### 在不同层级的表现
+**提取方向**：`页面 → components → hooks → domains`
 
-| 位置 | core 内容 | components 内容 | hooks 内容 |
-| --- | --- | --- | --- |
-| `views/{domain}/` | domain 级共享逻辑（如有） | domain 内跨 scene 共享组件 | domain 内跨 scene 共享 hooks |
-| `views/{domain}/{scene}/` | scene 共享 models/apis/constants/customers + 页面级编排 | scene 内跨 page 共享组件 | scene 内跨 page 共享 hooks |
-| `views/{domain}/{scene}/{page}/` | 页面专属编排逻辑（如有） | 页面私有组件 | 页面私有 hooks |
-| `components/shared/{service}/` | 跨领域通用服务 | 服务配套组件 | 服务配套 hooks |
+每一步都是代码自己"告诉"你该拆了，而不是规范强迫你提前建空文件。
 
 ---
 
-## 四、目录结构概览
+## 五、目录结构概览
 
 ```
 src/
-├── views/                                    # 视图层（页面与业务领域）
-│   ├── bidding/                              # domain
-│   │   ├── order/                            # scene
-│   │   │   ├── core/                         # 业务逻辑
-│   │   │   │   ├── index.js                  # 导出 services、models
-│   │   │   │   ├── models.js                 # 派生状态、业务规则、计算函数
-│   │   │   │   ├── models.test.js            # models 单元测试
-│   │   │   │   ├── configs.js                # 平台默认配置
-│   │   │   │   ├── constants.js              # 业务常量（枚举、状态映射）
-│   │   │   │   ├── apis.js                   # 接口请求
-│   │   │   │   ├── customers.js              # 客户策略
-│   │   │   │   ├── customers.test.js         # customers 策略测试
-│   │   │   │   ├── order-form/               # 页面级编排（如需要）
-│   │   │   │   │   ├── index.js
-│   │   │   │   │   └── index.test.js
-│   │   │   │   ├── order-list/
-│   │   │   │   └── order-detail/
-│   │   │   ├── components/                   # scene 内共享组件
-│   │   │   ├── hooks/                        # scene 内共享 hooks
-│   │   │   ├── order-form.vue                # 页面
+├── domains/                              # 领域业务层（纯逻辑，与框架无关）
+│   ├── shared/                           # 跨领域通用业务服务
+│   │   ├── upload/                       # 文件上传服务
+│   │   │   ├── index.js                  # 导出 services、models
+│   │   │   ├── apis.js                   # 上传相关接口
+│   │   │   └── models.js                 # 上传结果模型
+│   │   ├── permission/                   # 权限服务
+│   │   │   ├── index.js
+│   │   │   └── apis.js
+│   │   └── form-template/                # 表单模板服务
+│   │       ├── index.js
+│   │       └── apis.js
+│   ├── bidding/                          # 招投标领域
+│   │   ├── order/                        # 订单场景
+│   │   │   ├── index.js                  # 导出 services、models
+│   │   │   ├── models.js                 # 派生状态、业务规则、计算函数
+│   │   │   ├── models.test.js            # models 单元测试
+│   │   │   ├── configs.js                # 平台默认配置
+│   │   │   ├── constants.js              # 业务常量（枚举、状态映射）
+│   │   │   ├── apis.js                   # 接口请求
+│   │   │   ├── customers.js              # 客户策略
+│   │   │   └── customers.test.js         # customers 策略测试
+│   │   └── ...
+│   ├── contract/
+│   │   └── sign/
+│   └── supplier/
+│
+├── views/                                # 应用层（页面视图，Vue 相关）
+│   ├── bidding/
+│   │   ├── order/                        # scene
+│   │   │   ├── components/               # scene 内共享组件
+│   │   │   ├── hooks/                    # scene 内共享 hooks
+│   │   │   ├── order-form.vue            # 页面
 │   │   │   ├── order-list.vue
 │   │   │   └── order-detail.vue
 │   │   └── ...
 │   ├── contract/
-│   │   └── sign/
-│   │       ├── core/
-│   │       ├── components/
-│   │       ├── hooks/
-│   │       └── sign-form.vue
 │   └── supplier/
-│       └── ...
 │
-├── components/                               # 全局组件
-│   ├── common/                               # 纯 UI 组件（无业务语义）
-│   │   ├── Button.vue
-│   │   ├── Input.vue
-│   │   └── Modal.vue
-│   └── shared/                               # 跨领域业务基础设施
-│       ├── upload/
-│       │   ├── core/                         # services、models、apis
-│       │   │   ├── index.js
-│       │   │   ├── apis.js
-│       │   │   └── models.js
-│       │   ├── components/                   # AttachmentUploader 等
-│       │   └── hooks/                        # useUpload 等
-│       ├── permission/
-│       │   ├── core/
-│       │   └── hooks/
-│       └── form-template/
-│           ├── core/
-│           └── components/
+├── components/                           # 应用层组件（Vue 相关）
+│   ├── AttachmentUploader.vue            # 跨领域业务组件
+│   ├── RichTextEditor.vue
+│   ├── FormBuilder.vue
+│   └── ...
 │
-├── routes/                                   # 路由层（纯配置）
-│   ├── index.js                              # 创建路由实例，注册守卫
-│   ├── modules/                              # 路由定义（按领域拆分）
+├── routes/                               # 路由层（纯配置）
+│   ├── index.js                          # 创建路由实例，注册守卫
+│   ├── modules/                          # 路由定义（按领域拆分）
 │   │   ├── bidding.js
 │   │   ├── contract.js
 │   │   ├── supplier.js
-│   │   └── shared.js                         # 公共路由（登录、404、首页）
-│   ├── permission.js                         # 权限守卫
-│   └── constants.js                          # 路由常量（如 parentCode 枚举）
+│   │   └── shared.js                     # 公共路由（登录、404、首页）
+│   ├── permission.js                     # 权限守卫
+│   └── constants.js                      # 路由常量（如 parentCode 枚举）
 │
-├── stores/                                   # 全局状态（用户、主题、菜单等）
+├── stores/                               # 全局状态（用户、主题、菜单等）
 │   ├── user.js
 │   └── menu.js
-├── hooks/                                    # 全局通用 hooks（无业务依赖）
+├── hooks/                                # 全局通用 hooks（无业务依赖）
 │   ├── useDebounce.js
 │   └── useLocalStorage.js
-├── utils/                                    # 工具函数（格式化、深拷贝等）
+├── utils/                                # 基础设施层（纯函数，无副作用）
 └── ...
 ```
 
 ### 目录说明
 
-| 目录 | 用途 | 特点 |
-| --- | --- | --- |
-| `views/{domain}/` | 业务领域 | 包含该领域下所有 scene |
-| `views/{domain}/{scene}/` | 业务场景 | 包含页面、共享组件/hooks、业务逻辑 |
-| `views/{domain}/{scene}/core/` | 场景级业务逻辑 | 纯 JS/TS，无 UI 框架依赖，可独立测试 |
-| `components/common/` | 纯 UI 组件 | 无任何业务词汇，高度可复用 |
-| `components/shared/` | 跨领域业务基础设施 | 逻辑 + UI 一体，可被任何领域依赖 |
-| `routes/` | 路由配置 | 扁平定义，按领域拆分，守卫与路由同级 |
-| `hooks/` | 全局通用 hooks | 不依赖业务逻辑，如防抖、存储 |
-| `stores/` | 全局状态 | 如用户信息、主题配置 |
-| `utils/` | 工具函数 | 纯函数，无副作用 |
+| 目录 | 层级 | 用途 | 框架依赖 |
+| --- | --- | --- | --- |
+| `utils/` | 基础设施层 | 纯工具函数（格式化、深拷贝、请求封装等） | 无 |
+| `domains/` | 领域业务层 | 业务规则、API、数据转换、客户策略 | 无 |
+| `domains/shared/` | 领域业务层 | 跨领域通用业务服务（可被任何领域依赖） | 无 |
+| `views/` | 应用层 | 页面视图，按 domain/scene/page 组织 | Vue |
+| `components/` | 应用层 | 跨领域复用组件（含业务语义） | Vue |
+| `routes/` | 应用层 | 路由配置，按领域拆分 | Vue Router |
+| `stores/` | 应用层 | 全局状态（用户、主题等） | Pinia |
+| `hooks/` | 应用层 | 全局通用 hooks（无业务依赖） | Vue |
 
 ---
 
-## 五、各层职责详解
+## 六、各层职责详解
 
-### 5.1 `core/` 业务逻辑层
+### 6.1 `domains/` 领域业务层
 
-每个 core 目录是一个独立的业务逻辑单元，包含以下文件：
+每个场景是一个独立目录，包含以下文件：
 
 | 文件 | 职责 | 约束 |
 | --- | --- | --- |
@@ -189,33 +206,72 @@ src/
 | `customers.js` | 客户策略（`defaultStrategy` + `getCustomerLogic`） | 仅同步函数 |
 | `index.js` | 定义 services（异步调度），导出 services 和 models | 唯一异步层，返回纯对象 |
 
-#### core 的两种层级
+#### `domains/shared/` 跨领域通用服务
 
-**scene 级 core**（`views/{domain}/{scene}/core/`）：
+- 用于存放跨领域通用的业务服务（如文件上传、权限校验、表单模板管理等）。
+- 内部每个服务按子目录组织（如 `upload/`、`permission/`、`form-template/`），结构与其他 `domains` 一致（含 `index.js`、`apis.js`、`models.js` 等）。
+- 任何领域（如 `bidding`、`contract`）可以依赖 `domains/shared` 中的服务，但 `shared` 不能依赖具体领域。
+- **依赖边界**：`shared` 可依赖 `utils/`，不可依赖 `stores/` 或具体领域。
+- 示例：`bidding/order` 中的 services 可以调用 `shared/upload` 的 services 来上传附件。
 
-存放该场景的共享业务逻辑——models、apis、constants、customers。被该 scene 下所有 page 共享。
-
-**页面级 core**（`views/{domain}/{scene}/core/{page}/`）：
-
-存放页面专属的编排逻辑。仅当页面的 services 编排较复杂、需要独立管理时才创建。简单页面可直接在 scene core 中处理。
+#### 示例：`domains/shared/upload/index.js`
 
 ```javascript
-// views/bidding/order/core/order-form/index.js
-// 页面级编排：组装 scene core 中的 services 调用顺序
-import { orderServices } from '../'
+import * as apis from './apis'
+import * as models from './models'
 
-export async function initOrderForm(id, context) {
-  return orderServices.initForm(id, context)
+async function uploadFile(file, context) {
+  const res = await apis.upload(file)
+  return models.createUploadResult(res)
 }
 
-export async function submitOrderForm(formData, context) {
-  return orderServices.submitForm(formData, context)
+export const uploadServices = { uploadFile }
+export const uploadModels = models
+```
+
+#### 示例：在业务领域中调用共享服务
+
+```javascript
+// domains/bidding/order/index.js
+import { uploadServices } from '@/domains/shared/upload'
+
+async function submitForm(formData, context) {
+  if (formData.attachment) {
+    const uploadResult = await uploadServices.uploadFile(formData.attachment, context)
+    formData.attachmentUrl = uploadResult.url
+  }
+  return apis.submitOrder(formData)
 }
 ```
 
-#### 示例：`views/bidding/order/core/models.js`
+#### 6.1.1 `constants.js` - 业务常量
 
 ```javascript
+// domains/bidding/order/constants.js
+import { createDict } from "@/utils/dict";
+
+export const orderStatusDict = createDict({
+  DRAFT: { value: 0, label: "草稿", color: "gray" },
+  SUBMITTED: { value: 1, label: "已提交", color: "blue" },
+  APPROVED: { value: 2, label: "已通过", color: "green" },
+  REJECTED: { value: 3, label: "已驳回", color: "red" },
+});
+```
+
+#### 6.1.2 `configs.js` - 平台默认配置
+
+```javascript
+// domains/bidding/order/configs.js
+export const defaultFieldConfig = {
+  supplier: { label: "供应商", visible: true, required: true },
+  sampleRequired: { label: "是否需要样品", visible: false, required: false },
+};
+```
+
+#### 6.1.3 `models.js` - 派生状态与业务规则
+
+```javascript
+// domains/bidding/order/models.js
 import { orderStatusDict } from "./constants";
 
 export function calcTotal(items = []) {
@@ -253,9 +309,10 @@ export function createUIContext(formData) {
 }
 ```
 
-#### 示例：`views/bidding/order/core/apis.js`
+#### 6.1.4 `apis.js` - 接口请求
 
 ```javascript
+// domains/bidding/order/apis.js
 import request from "@/utils/request";
 
 export function getOrderDetail(id) {
@@ -267,9 +324,10 @@ export function submitOrder(data) {
 }
 ```
 
-#### 示例：`views/bidding/order/core/customers.js`
+#### 6.1.5 `customers.js` - 客户策略
 
 ```javascript
+// domains/bidding/order/customers.js
 import { needApprove as defaultNeedApprove, calcTotal } from "./models";
 
 export const defaultStrategy = {
@@ -301,9 +359,10 @@ function mergeStrategies(strategies) {
 }
 ```
 
-#### 示例：`views/bidding/order/core/index.js` - services 定义与导出
+#### 6.1.6 `index.js` - services 定义与导出
 
 ```javascript
+// domains/bidding/order/index.js
 import * as apis from "./apis";
 import * as models from "./models";
 import * as configs from "./configs";
@@ -346,8 +405,8 @@ export const orderModels = models;
 **约束**：
 - 唯一允许异步操作的地方。
 - services 方法返回**纯对象**（不含 `ref`/`reactive`）。
-- services 不能直接依赖其他 scene 的 services；需要跨场景数据时，通过 `context` 参数传入。
-- **可以依赖 `components/shared/` 中的 services**（如 `uploadServices`）。
+- services 不能直接依赖其他领域的 services；需要跨领域数据时，通过 `context` 参数传入。
+- **可以依赖 `domains/shared` 中的 services**。
 
 #### formData / formContext 分离
 
@@ -395,7 +454,7 @@ interface ServiceContext {
 
 - `context` 由页面组件或页面 hook 组装，不应在 services 内部构造
 - `context` 可包含任意字段，但 services 只应读取，不应修改
-- 跨场景数据通过 `context` 传入，禁止 services 直接 import 其他 scene 的 core
+- 跨领域数据通过 `context` 传入，禁止 services 直接 import 其他领域的 services
 
 #### TypeScript 类型声明
 
@@ -404,11 +463,11 @@ interface ServiceContext {
 - 类型定义应**就近声明**，与实现代码放在同一目录。
 - 可使用 `.d.ts` 文件或 JSDoc 注释。
 - 禁止将所有类型集中到单一的 `src/types/` 目录。
-- **core 层必须开启 strict 模式**，完整声明 interface，确保下游补全体验。
+- **`domains/` 必须开启 strict 模式**，完整声明 interface，确保下游补全体验。
 - 领域模型类型就近手写，API 响应类型就近声明（有 OpenAPI 工具链时可自动生成）。
 
 ```typescript
-// views/bidding/order/core/models.d.ts
+// domains/bidding/order/models.d.ts
 export function calcTotal(items: Array<{ price: number; quantity: number }>): number;
 export function createFormContext(apiData: any): {
   statusCtx: { value: string | number; label: string; color: string; isDraft: boolean; canEdit: boolean };
@@ -423,13 +482,13 @@ export function createUIContext(formData: { items: Array<unknown> }): {
 
 #### 测试规范
 
-core 层是纯函数，可独立测试。测试应遵循以下原则。
+`domains/` 是纯函数，可独立测试。测试应遵循以下原则。
 
 **测试文件位置**：与被测文件同目录，命名为 `*.test.js` 或 `*.test.ts`。
 **测试工具**：Vitest（与 Vite 生态一致）。
 
 ```
-views/bidding/order/core/
+domains/bidding/order/
 ├── models.js
 ├── models.test.js      ← models 单元测试
 ├── customers.js
@@ -463,7 +522,7 @@ describe("validateEmail", () => {
 **P0 参数化测试示例**：
 
 ```typescript
-// views/bidding/order/core/models.test.ts
+// domains/bidding/order/models.test.ts
 import { describe, it, expect } from "vitest";
 import { canSave } from "./models";
 
@@ -482,9 +541,9 @@ describe("报价表单保存条件", () => {
 
 ---
 
-### 5.2 `views/` 视图层
+### 6.2 `views/` 视图层
 
-#### 5.2.1 页面文件
+#### 6.2.1 页面文件
 
 页面 Vue 文件直接放在 scene 目录下，不额外套 `pages/` 子目录。
 
@@ -501,7 +560,7 @@ describe("报价表单保存条件", () => {
 
 <script setup>
 import { onMounted } from "vue";
-import { orderServices } from "./core";
+import { orderServices } from "@/domains/bidding/order";
 import { useOrderForm } from "./hooks/useOrderForm";
 
 const props = defineProps(["id"]);
@@ -519,12 +578,12 @@ onMounted(load);
 
 **约束**：
 - 禁止直接调用 `apis` 或写业务判断。
-- 禁止导入 core 内部的 `models.js` 或 `apis.js`，统一从 `index.js` 导入 services。
+- 禁止导入 `domains` 内部的 `models.js` 或 `apis.js`，统一从 `index.js` 导入 services。
 - 使用 scoped CSS 或 CSS Modules，避免全局样式污染。
 
-#### 5.2.2 页面私有 `components/` 与 `hooks/`
+#### 6.2.2 页面私有 `components/` 与 `hooks/`
 
-页面私有组件和 hooks 仅在该页面内使用。当页面逻辑较简单时，可直接放在 scene 的 `components/` 和 `hooks/` 中；当页面较复杂时，可在 core 中创建页面子目录。
+页面私有组件和 hooks 仅在该页面内使用。
 
 ```javascript
 // views/bidding/order/hooks/useOrderForm.js
@@ -560,15 +619,15 @@ export function useOrderForm(initFn, submitFn, context = {}) {
 }
 ```
 
-#### 5.2.3 场景内共享 `components/` 与 `hooks/`
+#### 6.2.3 场景内共享 `components/` 与 `hooks/`
 
 当同一 scene 内多个页面需要复用组件或 hook 时，放在 scene 的 `components/` 或 `hooks/` 中。
 
-**场景内共享 hooks 只能调用本 scene 的 core services**（不能跨场景直接调用）。
+**场景内共享 hooks 只能调用本领域的 services**（不能跨领域直接调用）。
 
 ```javascript
-// views/bidding/order/hooks/useBiddingPermission.js
-import { permissionServices } from "@/components/shared/permission/core";
+// views/bidding/hooks/useBiddingPermission.js
+import { permissionServices } from "@/domains/shared/permission";
 export function useBiddingPermission() {
   return { hasPermission: permissionServices.hasPermission };
 }
@@ -576,104 +635,45 @@ export function useBiddingPermission() {
 
 ---
 
-### 5.3 `components/shared/` 跨领域业务基础设施
+### 6.3 `components/` 应用层组件
 
-存放跨领域通用的业务服务及其配套 UI 组件。每个服务是一个独立目录，内部遵循统一的 `core | components | hooks` 结构。
+存放跨领域复用的组件。基于开源 UI 框架（Antdv）的项目中，大部分组件都有业务语义，不区分 `common/` 和 `business/`。
 
-#### 目录结构
+**示例**：
 
-```
-components/shared/
-├── upload/
-│   ├── core/                       # 上传服务逻辑
-│   │   ├── index.js
-│   │   ├── apis.js
-│   │   └── models.js
-│   ├── components/                 # AttachmentUploader 等
-│   └── hooks/                      # useUpload 等
-├── permission/
-│   ├── core/                       # 权限服务逻辑
-│   │   ├── index.js
-│   │   └── apis.js
-│   └── hooks/                      # usePermission 等
-└── form-template/
-    ├── core/
-    │   ├── index.js
-    │   └── apis.js
-    └── components/                 # FormBuilder 等
-```
+```vue
+<!-- components/RichTextEditor.vue -->
+<template>
+  <div>
+    <div ref="editor"></div>
+    <button @click="uploadImage">上传图片</button>
+  </div>
+</template>
 
-**依赖边界**：
-- `components/shared/` 可依赖 `utils/`，不可依赖 `stores/` 或具体领域。
-- 任何 scene 的 core 可以依赖 `components/shared/` 中的 services。
-- `components/shared/` 不能依赖具体领域（`views/{domain}/`）。
+<script setup>
+import { uploadServices } from '@/domains/shared/upload';
+const props = defineProps(['value', 'context']);
+const emit = defineEmits(['update:value']);
 
-#### 示例：`components/shared/upload/core/index.js`
-
-```javascript
-import * as apis from './apis'
-import * as models from './models'
-
-async function uploadFile(file, context) {
-  const res = await apis.upload(file)
-  return models.createUploadResult(res)
+async function uploadImage(file) {
+  const res = await uploadServices.uploadFile(file, props.context || {});
+  // 插入编辑器
 }
-
-export const uploadServices = { uploadFile }
-export const uploadModels = models
+</script>
 ```
 
-#### 示例：在业务 core 中调用共享服务
-
-```javascript
-// views/bidding/order/core/index.js
-import { uploadServices } from '@/components/shared/upload/core'
-
-async function submitForm(formData, context) {
-  if (formData.attachment) {
-    const uploadResult = await uploadServices.uploadFile(formData.attachment, context)
-    formData.attachmentUrl = uploadResult.url
-  }
-  return apis.submitOrder(formData)
-}
-```
-
-#### 示例：`components/shared/permission/core/index.js`
-
-```javascript
-import * as apis from './apis'
-
-const permissionCache = new Map()
-
-async function loadPermissions() {
-  const perms = await apis.getCurrentUserPermissions()
-  perms.forEach(p => permissionCache.set(p, true))
-}
-
-function hasPermission(code) {
-  return permissionCache.has(code)
-}
-
-function filterMenusByPermission(menus) {
-  return menus.filter(m => !m.meta?.permission || hasPermission(m.meta.permission))
-}
-
-export const permissionServices = { loadPermissions, hasPermission, filterMenusByPermission }
-```
+**约束**：
+- 跨领域组件放 `components/`，不放 `views/{domain}/components/`。
+- 如果组件确实需要调用具体领域服务，应通过参数注入或插槽方式解耦。
+- 可依赖 `domains/shared` 中的服务。
 
 ---
 
-### 5.4 `components/common/` 纯 UI 组件
-
-无任何业务语义的组件（Button、Input、Modal 等）。
-
----
-
-### 5.5 全局目录
+### 6.4 全局目录
 
 #### `hooks/` - 全局通用 hooks
 
-与业务无关的通用组合式函数（如 `useDebounce`、`useLocalStorage`），**不依赖任何 core 的 services**。需要通过业务能力时，采用参数注入方式。
+与业务无关的通用组合式函数（如 `useDebounce`、`useLocalStorage`），**不依赖任何 `domains` 的 services**。需要通过业务能力时，采用参数注入方式。
 
 ```javascript
 // src/hooks/useFetch.js
@@ -699,83 +699,82 @@ export function useFetch(fetchFn) {
 
 ---
 
-## 六、组件与 Hooks 抽取路径
+## 七、组件与 Hooks 抽取路径
 
-### 6.1 组件抽取原则
+### 7.1 组件抽取原则
 
 - 同一 UI 逻辑在 **2 处及以上** 出现时考虑提取。
 - 优先提取到最小可用范围，不要提前抽象。
 
-### 6.2 组件存放路径
+### 7.2 组件存放路径
 
 | 复用范围 | 存放位置 | 示例 |
 | --- | --- | --- |
-| 单个页面内 | `views/{domain}/{scene}/components/`（页面私有） | `views/bidding/order/components/ItemTable.vue` |
+| 单个页面内 | `views/{domain}/{scene}/components/` | `views/bidding/order/components/ItemTable.vue` |
 | 同一 scene 内多个页面 | `views/{domain}/{scene}/components/` | `views/bidding/order/components/SupplierCard.vue` |
-| 跨领域复用（有业务语义） | `components/shared/{service}/components/` | `components/shared/upload/components/AttachmentUploader.vue` |
-| 完全通用（无业务语义） | `components/common/` | `components/common/Button.vue` |
+| 跨领域复用 | `src/components/` | `src/components/RichTextEditor.vue` |
 
-### 6.3 Hooks 抽取路径与调用规则
+### 7.3 Hooks 抽取路径与调用规则
 
 | 复用范围 | 存放位置 | 允许调用的 services | 示例 |
 | --- | --- | --- | --- |
-| 单个页面内 | `views/{domain}/{scene}/hooks/` | ✅ 可调用任何 scene 的 core services | `views/bidding/order/hooks/useOrderFormWithContract.js` |
-| 同一 scene 内多个页面 | `views/{domain}/{scene}/hooks/` | ✅ 只能调用本 scene 的 core services | `views/bidding/order/hooks/useBiddingPermission.js` |
+| 单个页面内 | `views/{domain}/{scene}/hooks/` | ✅ 可调用任何领域 services | `views/bidding/order/hooks/useOrderFormWithContract.js` |
+| 同一 scene 内多个页面 | `views/{domain}/{scene}/hooks/` | ✅ 只能调用本领域 services | `views/bidding/order/hooks/useBiddingPermission.js` |
 | 跨领域复用（无业务依赖） | `src/hooks/` | ❌ 不能调用 services，通过参数注入 | `src/hooks/useFetch.js` |
 | 跨领域复用（有业务依赖） | 不应直接共享 Hook；应由页面级组合实现 | — | — |
 
 **约束**：
-- 页面私有 hooks 可以自由组合任意 scene 的 core services，用于处理该页面的复杂交互。
-- 场景内共享 hooks 必须保持内聚，只能调用本 scene 的 core services，不得跨场景直接依赖。
+- 页面私有 hooks 可以自由组合任意领域 services，用于处理该页面的复杂交互。
+- 场景内共享 hooks 必须保持内聚，只能调用本领域的 services，不得跨领域直接依赖。
 - 全局 hooks 必须保持纯净，只能通过参数接收业务能力。
 
 ---
 
-## 七、Services 与 Hooks 的分工
+## 八、Services 与 Hooks 的分工
 
-### 7.1 职责划分
+### 8.1 职责划分
 
 | 类型 | 职责 | 位置 | 依赖规则 | 返回 |
 | --- | --- | --- | --- | --- |
-| **services** | 业务逻辑：API、数据转换、规则判断、客户策略 | `views/{domain}/{scene}/core/index.js` | 可依赖同 scene 内页面级 core，不可跨场景直接依赖；需要跨场景数据时通过 `context` 参数传入；**可依赖 `components/shared/`** | 纯对象，不含响应式 |
-| **hooks（页面私有）** | 视图逻辑：响应式封装、状态管理、调用 services | `views/{domain}/{scene}/hooks/` | **可调用任何 scene 的 core services** | 响应式数据 + 方法 |
-| **hooks（场景共享）** | 视图逻辑：响应式封装、状态管理、调用 services | `views/{domain}/{scene}/hooks/` | **只能调用本 scene 的 core services** | 响应式数据 + 方法 |
+| **services** | 业务逻辑：API、数据转换、规则判断、客户策略 | `domains/{domain}/{scene}/index.js` | 可依赖同领域其他 services（细化→基础），不可跨领域直接依赖；需要跨领域数据时通过 `context` 参数传入；**可依赖 `domains/shared`** | 纯对象，不含响应式 |
+| **hooks（页面私有）** | 视图逻辑：响应式封装、状态管理、调用 services | `views/{domain}/{scene}/hooks/` | **可调用任何领域 services** | 响应式数据 + 方法 |
+| **hooks（场景共享）** | 视图逻辑：响应式封装、状态管理、调用 services | `views/{domain}/{scene}/hooks/` | **只能调用本领域 services** | 响应式数据 + 方法 |
 | **hooks（全局）** | 通用组合式函数，与业务无关 | `src/hooks/` | **不可调用 services**，只能通过参数注入 | 响应式数据 + 方法 |
 
-### 7.2 详细说明
+### 8.2 详细说明
 
 #### services
 
-- 不跨场景直接依赖其他 scene 的 core。如需其他场景的数据，应在 `context` 参数中声明，由调用方传入。
-- 页面级 core 可依赖同一 scene 的共享 core。
-- **可以依赖 `components/shared/` 中的 services**（如文件上传、权限服务）。
+- 不跨领域直接依赖其他领域的 services。如需其他领域的数据，应在 `context` 参数中声明，由调用方传入。
+- 细化场景可依赖同一领域内的基础场景。
+- **可以依赖 `domains/shared` 中的 services**。
 - 返回纯对象，供视图层包装。
 
 #### 页面私有 hooks
 
-- 可以直接调用任何 scene 的 core services，用于处理该页面的特定组合逻辑（如同时加载 bidding 和 contract 的数据）。
+- 可以直接调用任何领域的 services，用于处理该页面的特定组合逻辑（如同时加载 bidding 和 contract 的数据）。
 - 可以包含 `loading`、`error` 等 UI 状态管理。
 - 可调用全局 stores、其他 hooks。
 
 #### 场景内共享 hooks
 
-- 只能调用本 scene 的 core services，保持场景内聚。
-- 如果某个逻辑需要跨场景数据，应将该逻辑放在页面私有 hooks 中，而不是场景共享 hook。
+- 只能调用本领域的 services，保持领域内聚。
+- 如果某个逻辑需要跨领域数据，应将该逻辑放在页面私有 hooks 中，而不是场景共享 hook。
 
 #### 全局 hooks
 
-- 必须保持业务无关，不能直接依赖任何 core 下的 services。
+- 必须保持业务无关，不能直接依赖任何 `domains` 下的 services。
 - 如果需要业务能力，应通过参数注入（例如传入一个 `fetch` 函数）。
 - 适用于 `useDebounce`、`useLocalStorage`、`useMediaQuery` 等。
 
-### 7.3 示例
+### 8.3 示例
 
 ```javascript
-// ✅ 页面私有 hooks 可调用任何 scene 的 core services
+// ✅ 页面私有 hooks 可调用任何领域 services
 // views/bidding/order/hooks/useOrderWithContract.js
 import { ref } from 'vue'
-import { orderServices } from '../core'
-import { signServices } from '@/views/contract/sign/core'
+import { orderServices } from '@/domains/bidding/order'
+import { signServices } from '@/domains/contract/sign'
 export function useOrderWithContract(orderId, contractId) {
   const loading = ref(false)
   const orderData = ref(null)
@@ -791,9 +790,9 @@ export function useOrderWithContract(orderId, contractId) {
   return { loading, orderData, contractData, load }
 }
 
-// ✅ 场景内共享 hooks 只能调用本 scene 的 core services
-// views/bidding/order/hooks/useBiddingPermission.js
-import { permissionServices } from '@/components/shared/permission/core'
+// ✅ 场景内共享 hooks 只能调用本领域 services
+// views/bidding/hooks/useBiddingPermission.js
+import { permissionServices } from '@/domains/shared/permission'
 export function useBiddingPermission() {
   return { hasPermission: permissionServices.hasPermission }
 }
@@ -814,18 +813,18 @@ export function useFetch(fetchFn) {
 
 ---
 
-## 八、客户策略（customers.js）设计规范
+## 九、客户策略（customers.js）设计规范
 
-### 8.1 定位与职责
+### 9.1 定位与职责
 
 - 集中管理客户、灰度、租户等维度的业务差异。
 - 提供 `defaultStrategy` 和 `getCustomerLogic(context)`。
 - `context` 参数可包含任意扩展信息（如 `contractInfo`），用于策略判断。
 
-### 8.2 文件结构
+### 9.2 文件结构
 
 ```javascript
-// views/bidding/order/core/customers.js
+// domains/bidding/order/customers.js
 import { needApprove as defaultNeedApprove, calcTotal } from "./models";
 
 export const defaultStrategy = { needApprove: defaultNeedApprove };
@@ -844,10 +843,10 @@ export function getCustomerLogic(context) {
 }
 ```
 
-### 8.3 在 services 中使用
+### 9.3 在 services 中使用
 
 ```javascript
-// views/bidding/order/core/index.js
+// domains/bidding/order/index.js
 import { getCustomerLogic } from "./customers";
 
 async function submitForm(formData, context) {
@@ -862,18 +861,18 @@ async function submitForm(formData, context) {
 
 ---
 
-## 九、路由组织规范
+## 十、路由组织规范
 
-### 9.1 核心原则
+### 10.1 核心原则
 
 1. **路由扁平定义**：所有路由在同一层级，不嵌套 `children`，适配菜单可配置架构。
 2. **按领域拆分模块**：每个领域独立一个文件，位于 `routes/modules/` 下。
 3. **与 `views` 目录对齐**：路由的 `name`、`path`、`component` 导入路径保持一致的命名规则。
 4. **通过 `meta` 携带归属信息**：使用 `parentCode` 字段标识该路由归属的模块，便于运营配置菜单时关联。
 5. **路由守卫与路由定义同级**：守卫逻辑写在 `routes/permission.js` 等文件中，无需创建 `guards/` 子目录。
-6. **权限判断依赖领域服务**：守卫调用 `components/shared/permission/core` 服务，不自行实现业务逻辑。
+6. **权限判断依赖领域服务**：守卫调用 `domains/shared/permission` 服务，不自行实现业务逻辑。
 
-### 9.2 目录结构
+### 10.2 目录结构
 
 ```
 src/routes/
@@ -886,7 +885,7 @@ src/routes/
 └── constants.js           # parentCode 等常量
 ```
 
-### 9.3 路由定义示例
+### 10.3 路由定义示例
 
 ```javascript
 // routes/modules/bidding.js
@@ -927,11 +926,11 @@ export const PARENT_CODE = {
 
 > **约定**：`PARENT_CODE` 的值必须与后端菜单配置中的 `parentCode` 保持一致，新增领域时同步维护。
 
-### 9.4 权限守卫示例
+### 10.4 权限守卫示例
 
 ```javascript
 // routes/permission.js
-import { permissionServices } from '@/components/shared/permission/core';
+import { permissionServices } from '@/domains/shared/permission';
 
 export function setupPermissionGuard(router) {
   router.beforeEach((to, from, next) => {
@@ -945,7 +944,7 @@ export function setupPermissionGuard(router) {
 }
 ```
 
-### 9.5 路由入口组装
+### 10.5 路由入口组装
 
 ```javascript
 // routes/index.js
@@ -967,12 +966,12 @@ setupPermissionGuard(router);
 export default router;
 ```
 
-### 9.6 菜单数据存储（store）
+### 10.6 菜单数据存储（store）
 
 ```javascript
 // stores/menu.js
 import { defineStore } from 'pinia';
-import { permissionServices } from '@/components/shared/permission/core';
+import { permissionServices } from '@/domains/shared/permission';
 
 export const useMenuStore = defineStore('menu', {
   state: () => ({
@@ -986,25 +985,25 @@ export const useMenuStore = defineStore('menu', {
 });
 ```
 
-### 9.7 与老代码的过渡
+### 10.7 与老代码的过渡
 
 - **新功能**：严格按照上述规范组织路由、守卫、菜单 store。
 - **老功能**：逐步迁移，先将路由定义拆分到 `modules/`，再逐步替换守卫中的硬编码权限判断为调用 `permissionServices`。
 
 ---
 
-## 十、Code Review 检查清单
+## 十一、Code Review 检查清单
 
-- [ ] 业务逻辑是否写在对应 scene 的 `core/` 中？
-- [ ] `views` 页面中是否有直接调用 `apis` 或写业务判断？
+- [ ] 业务逻辑是否写在 `domains/` 中？
+- [ ] `views` 或 `components` 中是否有直接调用 `apis` 或写业务判断？
 - [ ] `models.js` 是否只包含同步纯函数，无副作用？
 - [ ] `models.js` 中是否有客户判断（`if customer === 'A'`）？
 - [ ] 客户差异是否通过 `customers.js` 策略实现？
 - [ ] services 是否返回纯对象（不含 `ref`）？
-- [ ] 是否避免了跨场景直接依赖 core services？需要跨场景数据时，是否通过 `context` 传入？
-- [ ] 场景内共享 hooks 是否只调用了本 scene 的 core services？
+- [ ] 是否避免了跨领域直接依赖 services？需要跨领域数据时，是否通过 `context` 传入？
+- [ ] 场景内共享 hooks 是否只调用了本领域的 services？
 - [ ] 全局 hooks（`src/hooks/`）是否没有直接调用任何 services？
-- [ ] 跨领域通用服务是否放在 `components/shared/` 下？
+- [ ] 跨领域通用业务服务是否放在 `domains/shared/` 下？
 - [ ] 组件/Hooks 是否按抽取路径放置？
 - [ ] 枚举常量是否使用 `createDict` 工厂？
 - [ ] `formData` 是否只包含后端字段？业务派生状态是否放在 `formContext`？纯 UI 状态（`isSubmitting`、`loading`）是否由 hook 管理？
@@ -1013,18 +1012,19 @@ export const useMenuStore = defineStore('menu', {
 
 ---
 
-## 十一、红线（禁止事项）
+## 十二、红线（禁止事项）
 
 | 禁止事项 | 正确做法 |
 | --- | --- |
-| ❌ `views` 页面中直接写 `axios.get` 或业务逻辑 | 封装在对应 scene 的 `core/` services 中 |
+| ❌ `views` 中直接写 `axios.get` 或业务逻辑 | 封装在 `domains` 的 services 中 |
 | ❌ `models.js` 中写客户判断 | 移到 `customers.js` 策略 |
 | ❌ services 返回 `ref`/`reactive` | 返回纯对象 |
-| ❌ services 中直接 `import` 其他 scene 的 core | 通过 `context` 参数接收所需数据；**通用服务可依赖 `components/shared/`** |
-| ❌ 场景内共享 hooks 中调用其他 scene 的 core services | 只能调用本 scene 的 core services |
-| ❌ 全局 hooks 中直接调用任何 services | 通过参数注入或保持在场景内 |
-| ❌ 将场景内 Hooks 直接放入全局 `src/hooks` | 先放场景内，确定无业务依赖再提升 |
-| ❌ 跨领域组件放在 `views/{domain}/{scene}/components/` | 提升到 `components/shared/` |
+| ❌ services 中直接 `import` 其他领域的 services | 通过 `context` 参数接收所需数据；**通用服务可依赖 `domains/shared`** |
+| ❌ 基础场景依赖细化场景 | 只能反向依赖 |
+| ❌ 场景内共享 hooks 中调用其他领域的 services | 只能调用本领域 services |
+| ❌ 全局 hooks 中直接调用任何 services | 通过参数注入或保持在领域内 |
+| ❌ 将领域内 Hooks 直接放入全局 `src/hooks` | 先放领域内，确定无业务依赖再提升 |
+| ❌ 跨领域组件放在 `views/{domain}/components/` | 提升到 `src/components/` |
 | ❌ `constants.js` 中放可变配置 | 配置放 `configs.js` |
 | ❌ 未出现重复就提前抽象 | 遵循"第三次重复再抽象" |
 | ❌ 模板中写 `data?.a?.b?.c` 可选链防御 | 由 models 兜底返回默认值，模板直接取值 |
@@ -1033,67 +1033,70 @@ export const useMenuStore = defineStore('menu', {
 
 ---
 
-## 十二、快速参考卡
+## 十三、快速参考卡
+
+### 三层架构速查
+
+```
+基础设施层：utils/              — 与框架无关，极少变化
+领域业务层：domains/            — 与框架无关，跟随业务变化
+应用    层：views/ components/ hooks/ routes/ stores/ — Vue 相关，频繁变化
+
+底座 = utils/ + domains/（可独立于 Vue 存在）
+```
 
 ### 目录速查
 
 ```
 src/
-├── views/{domain}/
-│   └── {scene}/
-│       ├── {page}.vue              # 页面文件
-│       ├── core/                   # 业务逻辑
-│       │   ├── index.js            # services
-│       │   ├── models.js           # 派生状态、规则
-│       │   ├── configs.js          # 默认配置
-│       │   ├── constants.js        # 常量（createDict）
-│       │   ├── apis.js             # 接口
-│       │   ├── customers.js        # 客户策略
-│       │   └── {page}/             # 页面级编排（按需）
-│       ├── components/             # scene 共享组件
-│       └── hooks/                  # scene 共享 hooks
-├── components/
-│   ├── common/                     # 纯 UI
-│   └── shared/{service}/           # 跨领域基础设施
-│       ├── core/
-│       ├── components/
-│       └── hooks/
+├── domains/{domain}/{scene}/       # 领域业务逻辑
+│   ├── index.js                    # services
+│   ├── models.js                   # 派生状态、规则
+│   ├── configs.js                  # 默认配置
+│   ├── constants.js                # 常量（createDict）
+│   ├── apis.js                     # 接口
+│   └── customers.js                # 客户策略
+├── views/{domain}/{scene}/
+│   ├── {page}.vue                  # 页面文件
+│   ├── components/                 # scene 共享组件
+│   └── hooks/                      # scene 共享 hooks
+├── components/                     # 跨领域复用组件
 ├── hooks/                          # 全局通用（无业务依赖）
-├── stores/
 ├── routes/
+├── stores/
 └── utils/
+```
+
+### 渐进式提取速查
+
+```
+页面 .vue → 提取 components/ → 提取 hooks/ → 业务规则进入 domains/
+
+提取方向：页面 → components → hooks → domains
+依赖方向：views → domains → utils（反向禁止）
 ```
 
 ### 决策速查
 
 | 问题 | 答案 |
 | --- | --- |
-| 业务逻辑放哪？ | `views/{domain}/{scene}/core/` |
-| 跨领域通用服务放哪？ | `components/shared/{service}/core/` |
+| 业务逻辑放哪？ | `domains/{domain}/{scene}/` |
+| 跨领域通用服务放哪？ | `domains/shared/` |
 | 页面如何消费？ | 调用 services，用 `ref` 包装 |
 | 客户差异放哪？ | `customers.js`，`getCustomerLogic(context)` 合并 |
-| 组件放哪？ | 页面私有 → scene 共享 → `components/shared/`（跨领域）→ `components/common/`（纯 UI） |
-| 页面私有 hooks 放哪？ | `views/{domain}/{scene}/hooks/`，可调用任何 core services |
-| 场景内共享 hooks 放哪？ | `views/{domain}/{scene}/hooks/`，只能调用本 scene 的 core services |
+| 组件放哪？ | 页面私有 → scene 共享 → `components/`（跨领域） |
+| 页面私有 hooks 放哪？ | `views/{domain}/{scene}/hooks/`，可调用任何 services |
+| 场景内共享 hooks 放哪？ | `views/{domain}/{scene}/hooks/`，只能调用本领域 services |
 | 全局 hooks 放哪？ | `src/hooks/`，不能调用 services，只能参数注入 |
 | 枚举常量放哪？ | `constants.js`，使用 `createDict` |
 | 默认配置放哪？ | `configs.js` |
 
-### 统一结构速记
-
-```
-所有垂直领域 = core | components | hooks
-
-提取方向：components → hooks → core
-依赖方向：core → hooks → components
-```
-
 ### 检查清单速记
 
-1. **页面** 只调 services，不写业务。
+1. **views** 只调 services，不写业务。
 2. **models** 是纯函数，无客户判断。
 3. **customers** 收口差异逻辑。
-4. **services** 返回纯对象，不返回 ref；跨场景数据通过 context 传入。
-5. **场景内共享 hooks** 只调本 scene 的 core services。
+4. **services** 返回纯对象，不返回 ref；跨领域数据通过 context 传入。
+5. **场景内共享 hooks** 只调本领域 services。
 6. **全局 hooks** 不调任何 services，只能参数注入。
-7. **跨领域服务**放 `components/shared/`，**业务逻辑**放 scene 的 `core/`。
+7. **通用业务服务**放 `domains/shared/`，**跨领域组件**放 `components/`。

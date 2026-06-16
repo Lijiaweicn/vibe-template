@@ -12,16 +12,27 @@ paths:
 
 Vue 3 + TypeScript + Vite | 微前端：wujie | UI：Antdv Next | 包管理：pnpm
 
+## 三层架构（按变化频率分层）
+
+| 层级 | 目录 | 职责 | 框架依赖 |
+|------|------|------|---------|
+| 基础设施层 | `utils/` | 纯工具函数 | 无 |
+| 领域业务层 | `domains/` | 业务规则、API、数据转换 | 无 |
+| 应用层 | `views/`、`components/`、`hooks/`、`routes/`、`stores/` | 页面视图、UI 组件、路由 | Vue |
+
+**底座**：`utils/` + `domains/` 构成与框架无关的项目底座。
+
 ## 核心原则
 
-1. **统一垂直结构**：所有垂直领域内部统一为 `core | components | hooks` 三层结构
-2. **业务逻辑就近归属**：业务逻辑放在消费它的领域/场景的 `core/` 目录下
+1. **按变化频率分层**：基础设施层、领域业务层、应用层隔离，各自演进
+2. **领域逻辑框架无关**：`domains/` 是纯 JS/TS，不依赖 Vue
 3. **视图层薄薄一层**：页面只负责模板、交互和调用 services，不写业务判断
 4. **客户差异隔离**：通过 `customers.js` 策略模式管理，禁止 `if (customer === 'A')`
-5. **依赖方向**：`core → hooks → components`（core 不依赖 hooks/components）
-6. **渐进式落地**：新功能按规范写，老代码不强求全量重构
-7. **架构熔断**：极简页面允许跳过标准架构，增加联动后必须重构
-8. **按需创建**：不创建空文件
+5. **渐进式提取**：页面 → components → hooks → domains，先有血肉再长骨架
+6. **依赖方向**：应用层 → 领域层 → 基础设施层，反向禁止
+7. **渐进式落地**：新功能按规范写，老代码不强求全量重构
+8. **架构熔断**：极简页面允许跳过标准架构，增加联动后必须重构
+9. **按需创建**：不创建空文件
 
 ## 领域层级
 
@@ -33,41 +44,32 @@ Vue 3 + TypeScript + Vite | 微前端：wujie | UI：Antdv Next | 包管理：pn
 
 ```
 src/
-├── views/{domain}/
-│   └── {scene}/
-│       ├── {page}.vue              # 页面文件
-│       ├── core/                   # 业务逻辑（models/apis/constants/customers）
-│       │   └── {page}/             # 页面级编排（按需）
-│       ├── components/             # scene 共享组件
-│       └── hooks/                  # scene 共享 hooks
-├── components/
-│   ├── common/                     # 纯 UI
-│   └── shared/{service}/           # 跨领域基础设施
-│       ├── core/
-│       ├── components/
-│       └── hooks/
-├── hooks/                          # 全局通用（无业务依赖）
+├── domains/{domain}/{scene}/     # 领域业务逻辑
+│   ├── index.js                  # services
+│   ├── models.js                 # 派生状态、规则
+│   ├── configs.js                # 默认配置
+│   ├── constants.js              # 常量（createDict）
+│   ├── apis.js                   # 接口
+│   └── customers.js              # 客户策略
+├── views/{domain}/{scene}/
+│   ├── {page}.vue                # 页面文件
+│   ├── components/               # scene 共享组件
+│   └── hooks/                    # scene 共享 hooks
+├── components/                   # 跨领域复用组件
+├── hooks/                        # 全局通用（无业务依赖）
 ├── routes/
 ├── stores/
 └── utils/
 ```
 
-## 统一结构
-
-所有垂直领域 = `core | components | hooks`
-
-- 提取方向：`components → hooks → core`
-- 依赖方向：`core → hooks → components`
-
 ## 依赖方向（红线）
 
-- ✅ `views/{domain}/{scene}/core/` → `components/shared/*/core/`
-- ✅ page core → scene core（细化→基础）
-- ✅ hooks → core
-- ✅ components → hooks、core
-- ❌ core → hooks、components
-- ❌ 跨场景 core 直接 import（通过 `context` 参数传入）
-- ❌ `components/shared/` → 具体领域
+- ✅ `views` → `domains` → `utils`
+- ✅ `domains/{domain}` → `domains/shared/`
+- ✅ `domains/{domain}/{scene}` → `domains/{domain}/{base-scene}`（细化→基础）
+- ❌ `domains` → `views`、`components`
+- ❌ `domains/{base}` → `domains/{scene}`（基础→细化）
+- ❌ 跨领域 services 直接 import（通过 `context` 参数传入）
 
 ## 历史遗留坑点
 
