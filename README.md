@@ -53,7 +53,7 @@ AI 协作开发的前端项目模板，基于三层架构和 VBW 工作流，让
 │       ├── explore/                # 需求探索阶段
 │       ├── specify/                # 需求产出阶段
 │       ├── implement/              # 逐项开发阶段
-│       ├── debug/                  # 日志优先诊断
+│       ├── debug/                  # 问题诊断
 │       └── accept/                 # 收尾验收阶段
 ├── commands/
 │   └── codegraph.md                # /codegraph 命令
@@ -81,7 +81,7 @@ VBW（Vibe-Based Workflow）是从需求规划到开发验收的完整编排流�
 /vbw specify      # 需求产出
 /vbw implement    # 逐项开发
 /vbw accept       # 收尾验收
-/vbw debug        # 日志优先诊断（验收发现问题时自动触发，也可手动调用）
+/vbw debug        # 问题诊断（验收发现问题时自动触发，也可手动调用）
 ```
 
 单独调用适合跳过前序阶段直接进入某个环节，比如已有需求文档时直接 `/vw implement` 开始开发。
@@ -93,7 +93,7 @@ explore → specify → implement → accept
   需求探索   需求产出   逐项开发   人工验收
                        ↓ 问题
                       debug
-                    日志优先诊断
+                    问题诊断
 ```
 
 | 阶段 | 目标 | 产出物 |
@@ -101,7 +101,7 @@ explore → specify → implement → accept
 | **explore** | 需求访谈，明确问题和验收标准 | 需求摘要 |
 | **specify** | 生成任务骨架 | README.md + task 文件 |
 | **implement** | 逐项开发、深化、自检 | 功能代码 + 测试 |
-| **debug** | 验收发现问题时，先插桩收集日志再定位修复 | 诊断结果 + 修复 |
+| **debug** | 验收发现问题时，先分析再决定修复方式 | 诊断结果 + 修复 |
 | **accept** | 一致性检查 + 总结 | 验收报告 |
 
 ### 插槽扩展
