@@ -77,14 +77,14 @@ VBW（Vibe-Based Workflow）是从需求规划到开发验收的完整编排流�
 **单独调用某个阶段**：
 
 ```
-/vbw-explore      # 需求探索
-/vbw-specify      # 需求产出
-/vbw-implement    # 逐项开发
-/vbw-accept       # 收尾验收
-/vbw-debug        # 日志优先诊断（验收发现问题时自动触发，也可手动调用）
+/vbw explore      # 需求探索
+/vbw specify      # 需求产出
+/vbw implement    # 逐项开发
+/vbw accept       # 收尾验收
+/vbw debug        # 日志优先诊断（验收发现问题时自动触发，也可手动调用）
 ```
 
-单独调用适合跳过前序阶段直接进入某个环节，比如已有需求文档时直接 `/vbw-implement` 开始开发。
+单独调用适合跳过前序阶段直接进入某个环节，比如已有需求文档时直接 `/vw implement` 开始开发。
 
 ### 流程阶段
 

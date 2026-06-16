@@ -9,8 +9,15 @@ VBW（Vibe-Based Workflow）是一个插槽式工作流，将需求规划到开�
 
 ## 触发条件
 
-通过 Skill 工具调用（`vbw`）。两种场景：
-- **完整流程**：新功能开发，从阶段 1 开始
+通过 Skill 工具调用（`vbw`）。支持参数路由：
+
+- **无参数**（`/vbw`）：完整流程，从阶段 1 开始
+- **指定阶段**（`/vbw <阶段名>`）：跳转到指定阶段执行
+  - `/vbw explore` → 需求探索
+  - `/vbw specify` → 需求产出
+  - `/vbw implement` → 逐项开发
+  - `/vbw accept` → 收尾验收
+  - `/vbw debug` → 日志优先诊断
 - **增量补充**：implement 阶段中途需要调整任务文档时，跳回 specify 补充
 
 ## 流程总览
