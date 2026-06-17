@@ -1,9 +1,9 @@
 ---
-name: vbw-implement
+name: feature-dev-implement
 description: 逐项开发 - 按任务逐个深化、TDD 开发、自检、验收
 ---
 
-# VBW 逐项开发
+# Feature Dev 逐项开发
 
 按任务列表逐个开发，每个任务独立走 深化 → 开发 → 自检 → 验收 循环。
 
@@ -93,7 +93,7 @@ description: 逐项开发 - 按任务逐个深化、TDD 开发、自检、验收
 
 验收循环：
 - 用户发现问题 → 调用 debug 插槽诊断 → 基于诊断结果修复 → 重新展示相关验收项
-  - 读取 `config.yaml` 的 `debug` 插槽。skill 不为 null 时调用外部 skill；为 null 时执行 `vbw/debug` 内置诊断
+  - 读取 `config.yaml` 的 `debug` 插槽。skill 不为 null 时调用外部 skill；为 null 时执行 `feature-dev/debug` 内置诊断
   - 诊断流程：先插桩收集运行时日志，再基于日志定位根因，最后修复
   - **禁止跳过诊断直接改代码**
 - 所有验收项通过 → 更新 README 标记任务完成，继续下一个任务

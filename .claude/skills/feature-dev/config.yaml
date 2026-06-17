@@ -1,4 +1,4 @@
-# VBW 插槽配置
+# Feature Dev 插槽配置
 # 流程：explore → specify → implement → accept
 #
 # 解析规则（编排层执行）：
@@ -14,39 +14,44 @@ slots:
   # 阶段 1：需求探索 — 通过访谈明确需求
   explore:
     skill: brainstorming   # superpowers 的协作式需求收集
-    builtin: vbw/explore
+    builtin: feature-dev/explore
 
   # 增强：假设质疑（在 explore 信息收集完成后触发）
   challenge:
     skill: grill-me        # 对抗式假设质疑
-    builtin: vbw/explore
+    builtin: feature-dev/explore
 
   # 阶段 2：需求产出 — 生成 README + task 文件骨架
   specify:
-    skill: vbw/specify
-    builtin: vbw/specify
+    skill: feature-dev/specify
+    builtin: feature-dev/specify
 
   # 阶段 3：逐项开发 — 按任务逐个深化+开发+自检
   implement:
-    skill: vbw/implement
-    builtin: vbw/implement
+    skill: feature-dev/implement
+    builtin: feature-dev/implement
 
   # 增强：设计决策质疑（在 implement 按需深化中触发）
   challenge-design:
     skill: null     # 安装 improve-codebase-architecture 后激活
-    builtin: vbw/implement
+    builtin: feature-dev/implement
 
   # 增强：TDD 驱动（在 implement 逐项开发中触发）
   tdd:
     skill: null     # 安装 tdd 后激活
-    builtin: vbw/implement
+    builtin: feature-dev/implement
 
   # 增强：日志优先诊断（在 implement 验收发现问题时触发）
   debug:
     skill: null     # 可挂载外部调试 skill
-    builtin: vbw/debug
+    builtin: feature-dev/debug
+
+  # 增强：Code Review（在 implement 自检阶段触发）
+  review:
+    skill: feature-review   # 复用独立 feature-review skill
+    builtin: feature-dev/implement
 
   # 阶段 4：收尾 — 一致性检查 + 总结
   accept:
-    skill: vbw/accept
-    builtin: vbw/accept
+    skill: feature-dev/accept
+    builtin: feature-dev/accept

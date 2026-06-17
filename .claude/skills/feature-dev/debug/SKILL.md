@@ -1,9 +1,9 @@
 ---
-name: vbw-debug
+name: feature-dev-debug
 description: 日志优先诊断 — 先分析再修复，必要时插桩收集日志
 ---
 
-# VBW 问题诊断
+# Feature Dev 问题诊断
 
 验收发现问题时触发。先分析汇报，由用户决定修复方式。
 

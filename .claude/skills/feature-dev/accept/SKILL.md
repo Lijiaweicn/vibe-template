@@ -1,9 +1,9 @@
 ---
-name: vbw-accept
+name: feature-dev-accept
 description: 人工验收 - 用户逐项确认验收清单，更新 README 状态
 ---
 
-# VBW 人工验收
+# Feature Dev 人工验收
 
 用户逐项确认验收清单，通过后标记任务完成并更新 README。
 

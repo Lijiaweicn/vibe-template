@@ -1,9 +1,9 @@
 ---
-name: vbw-specify
+name: feature-dev-specify
 description: 需求产出 - 生成 README.md 和 task 文件骨架
 ---
 
-# VBW 需求产出
+# Feature Dev 需求产出
 
 根据探索阶段的需求理解，生成 README.md 和 task 文件骨架。
 

@@ -1,15 +1,15 @@
 ---
-name: vbw-explore
+name: feature-dev-explore
 description: 需求探索 - 通过访谈梳理需求，质疑假设，明确边界条件
 ---
 
-# VBW 需求探索
+# Feature Dev 需求探索
 
 通过 AI 辅助访谈梳理需求，再以对抗性质疑暴露隐含假设。
 
 ## 前置条件
 
-无。这是 VBW 流程的第一个阶段。
+无。这是 Feature Dev 流程的第一个阶段。
 
 ## 流程
 

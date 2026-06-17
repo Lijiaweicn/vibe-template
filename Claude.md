@@ -4,12 +4,13 @@
 2. 显隐逻辑统一管理
 3. 业务逻辑必须可测试
 
-# 工作流程（VBW）
+# 工作流程
 
-新功能开发使用 VBW 工作流程，通过 Skill 工具调用：
+新功能开发使用 Feature Dev 工作流程，通过 Skill 工具调用：
 
-- **完整流程**：`vbw` — 从需求规划到开发验收的完整编排
-- **插槽扩展**：编辑 `.claude/skills/vbw/config.yaml` 可替换各阶段的执行 skill
+- **完整流程**：`feature-dev` — 从需求规划到开发验收的完整编排
+- **独立 Review**：`feature-review` — 需求阶段性开发完成后的代码健壮性检查
+- **插槽扩展**：编辑 `.claude/skills/feature-dev/config.yaml` 可替换各阶段的执行 skill
 
 # Tools
 

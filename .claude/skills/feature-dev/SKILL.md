@@ -1,23 +1,23 @@
 ---
-name: vbw
-description: VBW 工作流编排器 — 需求规划到开发验收的完整流程，支持插槽式扩展
+name: feature-dev
+description: 功能开发流程 — 需求规划到开发验收的完整编排，支持插槽式扩展
 ---
 
-# VBW 工作流编排器
+# Feature Dev 功能开发流程
 
-VBW（Vibe-Based Workflow）是一个插槽式工作流，将需求规划到开发验收拆为固定阶段，每个阶段可挂载不同 skill。
+Feature Dev 是一个插槽式工作流，将需求规划到开发验收拆为固定阶段，每个阶段可挂载不同 skill。
 
 ## 触发条件
 
-通过 Skill 工具调用（`vbw`）。支持参数路由：
+通过 Skill 工具调用（`feature-dev`）。支持参数路由：
 
-- **无参数**（`/vbw`）：完整流程，从阶段 1 开始
-- **指定阶段**（`/vbw <阶段名>`）：跳转到指定阶段执行
-  - `/vbw explore` → 需求探索
-  - `/vbw specify` → 需求产出
-  - `/vbw implement` → 逐项开发
-  - `/vbw accept` → 收尾验收
-  - `/vbw debug` → 问题诊断
+- **无参数**（`/feature-dev`）：完整流程，从阶段 1 开始
+- **指定阶段**（`/feature-dev <阶段名>`）：跳转到指定阶段执行
+  - `/feature-dev explore` → 需求探索
+  - `/feature-dev specify` → 需求产出
+  - `/feature-dev implement` → 逐项开发
+  - `/feature-dev accept` → 收尾验收
+  - `/feature-dev debug` → 问题诊断
 - **增量补充**：implement 阶段中途需要调整任务文档时，跳回 specify 补充
 
 ## 流程总览
@@ -56,7 +56,7 @@ specify 只产出骨架（README + task 文件），不强制深化所有细节�
 ```yaml
 challenge:
   skill: grill-me      # 外部增强（可选）
-  builtin: vbw/explore # 内置兜底（必有）
+  builtin: feature-dev/explore # 内置兜底（必有）
 ```
 
 **执行顺序**：
@@ -75,9 +75,9 @@ challenge:
 
 **插槽**：`explore`（配置见 config.yaml）
 
-**内置实现**（`vbw/explore`）：通过逐个提问梳理需求，每次只问一个问题。
+**内置实现**（`feature-dev/explore`）：通过逐个提问梳理需求，每次只问一个问题。
 
-**增强插槽**：`challenge` — 信息收集完成后，调用 challenge 插槽进行假设质疑。skill 为 null 时由 `vbw/explore` 内置质疑模式兜底。
+**增强插槽**：`challenge` — 信息收集完成后，调用 challenge 插槽进行假设质疑。skill 为 null 时由 `feature-dev/explore` 内置质疑模式兜底。
 
 **门禁条件**：
 - [ ] 明确了要解决什么问题
@@ -92,7 +92,7 @@ challenge:
 
 **插槽**：`specify`
 
-**内置实现**（`vbw/specify`）：
+**内置实现**（`feature-dev/specify`）：
 - 从分支名提取需求标识
 - 创建 `docs/feature/` 目录和 README.md
 - 填充核心功能概述
@@ -193,7 +193,7 @@ challenge:
 
 验收循环：
 - 用户发现问题 → 调用 debug 插槽诊断 → 基于诊断结果修复 → 重新展示相关验收项
-  - 读取 `config.yaml` 的 `debug` 插槽。skill 不为 null 时调用外部 skill；为 null 时执行 `vbw/debug` 内置诊断
+  - 读取 `config.yaml` 的 `debug` 插槽。skill 不为 null 时调用外部 skill；为 null 时执行 `feature-dev/debug` 内置诊断
   - 诊断流程：先插桩收集运行时日志，再基于日志定位根因，最后修复
   - **禁止跳过诊断直接改代码**
 - 所有验收项通过 → 更新 README 标记任务完成，继续下一个任务
