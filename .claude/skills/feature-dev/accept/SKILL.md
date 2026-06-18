@@ -1,11 +1,11 @@
 ---
 name: feature-dev-accept
-description: 人工验收 - 用户逐项确认验收清单，更新 README 状态
+description: 需求级验收 - 一致性检查与总结
 ---
 
-# Feature Dev 人工验收
+# Feature Dev 需求级验收
 
-用户逐项确认验收清单，通过后标记任务完成并更新 README。
+需求级一致性检查，填写总结，确认开发完成。
 
 ## 前置条件
 
