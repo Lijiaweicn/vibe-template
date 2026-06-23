@@ -40,6 +40,8 @@ id: {id}  # 带需求编号：REQ-001；自增编号：issue-001
 title: 需求标题
 priority: high | medium | low
 created: YYYY-MM-DD
+tags: []  # 可选，如：[用户管理, 登录]
+keywords: []  # 可选，如：[认证, 安全, OAuth]
 ---
 
 # {需求标题}
@@ -69,9 +71,10 @@ created: YYYY-MM-DD
 3. 确定 issue ID：
    - 用户提供了需求编号 → 直接使用
    - 未提供 → 扫描 `docs/issue/` 现有文件，取最大编号 + 1
-4. 创建 issue 文件
-5. 更新 `docs/issue/README.md` 索引，追加条目
-6. 向用户确认创建成功
+4. 根据需求描述自动推断 tags 和 keywords（用户可修改）
+5. 创建 issue 文件
+6. 更新 `docs/issue/README.md` 索引，追加条目
+7. 向用户确认创建成功
 
 **分支提取模式**（`--from-branch`）：
 

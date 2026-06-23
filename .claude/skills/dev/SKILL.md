@@ -195,6 +195,21 @@ keywords:
      - 不存在：创建新 spec
      - 已存在：追加或更新相关内容
    - 未涉及业务行为变更时跳过此步
+
+   **Spec 内容原则**：记录**业务规则**而非**代码实现**。
+
+   ✅ 有价值的 spec：
+   - 业务规则：「企业认证后才能发布采购需求」
+   - 业务约束：「采购金额不得超过预算限额」
+   - 状态流转：「订单状态：草稿 → 待审核 → 已通过/已拒绝」
+   - 权限规则：「只有企业管理员可以修改企业信息」
+
+   ❌ 无价值的 spec（避免）：
+   - API 调用细节：「调用 companyServices.getCompanyInfo()」
+   - 字段名列举：「返回 companyId、companyName、companyType...」
+   - 代码实现：「使用 useState 管理表单状态」
+
+   **判断标准**：如果代码重构了（换框架、换 API），这条 spec 是否仍然有效？
 4. **归档**（目标：`docs/archive/{year}/`）：
    - 有对应 issue：将 issue 文件移入归档目录，更新 `docs/issue/README.md` 索引
    - 无对应 issue：将 plan/README.md 重命名为 `{kebab-case-slug}.md` 后移入归档目录
