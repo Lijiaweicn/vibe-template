@@ -27,6 +27,6 @@ description: 问题修复 — 问题收集、定位分析、修复实现、验�
 ### 阶段 4: 收尾（用户确认问题解决后）
 
 - 清理调试代码（console.log、debugger）
-- 执行 lint + typecheck
-- 调用 code-reviewer 检查
+- 执行项目配置的 lint 和类型检查命令
+- 如果项目配置了 code-reviewer agent，调用检查
 - 展示变更摘要

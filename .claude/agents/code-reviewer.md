@@ -2,9 +2,11 @@
 name: code-reviewer
 description: 代码审查协调者 — 按变更类型加载规则，执行检查，输出报告
 model: inherit
-tools: Read, Grep, Glob, mcp__codegraph__codegraph_search, mcp__codegraph__codegraph_node, mcp__codegraph__codegraph_callers, mcp__codegraph__codegraph_explore
+tools: Read, Grep, Glob
 execution_role: sub_agent
 ---
+
+> **提示**：安装 codegraph MCP 工具可获得更精准的代码分析能力（符号查找、调用链追踪）。
 
 # 代码审查协调者
 
@@ -22,9 +24,10 @@ execution_role: sub_agent
 
 **架构层**（加载 `architecture.md`）：
 
-- `**/infra/**`、`**/config/**`、`**/services/**` — 基础设施
-- `**/shared/**`、`**/common/**` — 共享层
+- `**/config/**`、`**/services/**` — 基础设施
+- `**/shared/**`、`**/common/**`、`**/utils/**` — 共享层
 - `**/types/**`、`**/interfaces/**` — 类型定义
+- `**/store/**`、`**/stores/**` — 状态管理
 
 **前端层**（加载 `frontend.md`）：
 
@@ -52,9 +55,6 @@ execution_role: sub_agent
 - `.claude/rules/code-review/frontend.md`
 - `.claude/rules/code-review/testing.md`
 - `.claude/rules/code-review/quality.md`
-
-如果上述路径不存在，回退到：
-- `.claude/rules/code-review.md` — 通用清单
 
 ### 3. 执行检查
 
