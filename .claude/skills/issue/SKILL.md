@@ -70,7 +70,7 @@ created: YYYY-MM-DD
    - 用户提供了需求编号 → 直接使用
    - 未提供 → 扫描 `docs/issue/` 现有文件，取最大编号 + 1
 4. 创建 issue 文件
-5. 更新 `docs/issue/README.md` 索引，在「待办」区追加条目
+5. 更新 `docs/issue/README.md` 索引，追加条目
 6. 向用户确认创建成功
 
 **分支提取模式**（`--from-branch`）：

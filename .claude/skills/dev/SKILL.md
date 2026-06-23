@@ -97,10 +97,10 @@ keywords:
 
 1. 检查 `docs/plan/` 是否已有进行中的需求（README.md 存在）
    - **有** → 进入「进度恢复」
-   - **无** → 检查 `docs/issue/` 是否有待办 issue
-     - **有待办** → 列出待办 issue（标题 + priority + 简要描述），让用户选取或输入新需求
-     - **无待办** → 提示用户输入需求描述（或先 `/issue` 捕获）
-2. 如果从 issues/ 选取：将 issue 文件移入 `docs/plan/` 作为 README.md 的初始内容，更新 issues/README.md 索引为「进行中」
+   - **无** → 检查 `docs/issue/` 是否有需求列表
+     - **有需求** → 列出待开发需求（标题 + priority + 简要描述），让用户选取或输入新需求
+     - **无需求** → 提示用户输入需求描述（或先 `/issue` 捕获）
+2. 如果从 issues/ 选取：将 issue 文件移入 `docs/plan/` 作为 README.md 的初始内容，更新 issues/README.md 索引
 3. **等待用户明确指令**
 
 ### 进度恢复（启动时）
@@ -182,19 +182,23 @@ keywords:
 
 ### 需求归档（所有任务完成 + 用户确认后）
 
-1. **写总结**：通过 git 记录提取完整 commit 信息，在 README 中增加「开发总结」章节（没有的内容不要编造）：
+1. **写总结**：通过 git 记录提取完整 commit 信息，在 plan/README.md 中增加「开发总结」章节（没有的内容不要编造）：
    - 功能增量：新增/修改了哪些功能
    - 规则增量：新增/修改了哪些业务规则
    - 影响范围：影响了哪些模块/功能
    - 风险记录：潜在风险点（如有）
    - 决策记录：技术决策及原因（如有）
-2. **提取行为规格**到 `docs/spec/`（如项目有此目录）：
+2. **写入 issue**：将开发总结写入对应的 issue 文件（如有）
+3. **提取行为规格**到 `docs/spec/`（如项目有此目录）：
    - 从验收清单、技术方案、功能增量中识别涉及的业务模块
    - 对每个模块，检查 `docs/spec/{module}.md` 是否存在
      - 不存在：创建新 spec
      - 已存在：追加或更新相关内容
    - 未涉及业务行为变更时跳过此步
-3. **归档**（目标：`docs/archive/{year}/`）：
-   - 有对应 issue：将总结写入 issue 文件，移入归档目录（保留原文件名，如 `issue-001-slug.md`），更新 `docs/issue/README.md` 索引
-   - 无对应 issue：将 README.md 重命名为 `{kebab-case-slug}.md` 后移入归档目录
-   - 删除任务文件
+4. **归档**（目标：`docs/archive/{year}/`）：
+   - 有对应 issue：将 issue 文件移入归档目录，更新 `docs/issue/README.md` 索引
+   - 无对应 issue：将 plan/README.md 重命名为 `{kebab-case-slug}.md` 后移入归档目录
+5. **清理**：
+   - 删除 plan 目录下的任务文件
+   - 清空或删除 plan/README.md
+   - 更新 `docs/issue/README.md` 索引（移除已归档条目）
