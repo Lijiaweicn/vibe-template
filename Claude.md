@@ -6,11 +6,11 @@
 
 # 工作流程
 
-新功能开发使用 Feature Dev 工作流程，通过 Skill 工具调用：
+## Skills（通过 Skill 工具调用）
 
-- **完整流程**：`feature-dev` — 从需求规划到开发验收的完整编排
-- **独立 Review**：`feature-review` — 需求阶段性开发完成后的代码健壮性检查
-- **插槽扩展**：编辑 `.claude/skills/feature-dev/config.yaml` 可替换各阶段的执行 skill
+- `/dev` — 新功能开发（需求理解 → 任务规划 → 逐项开发 → 需求归档）
+- `/fix` — 问题修复（问题收集 → 定位分析 → 修复实现 → 验证）
+- `/issue` — 需求捕获（快速记录需求想法，不启动开发流程）
 
 # Tools
 
