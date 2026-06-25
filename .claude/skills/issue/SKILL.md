@@ -5,12 +5,24 @@ description: 需求捕获 — 快速记录需求到 docs/issue/
 
 # /issue — 需求捕获
 
+## When to Use
+
+- 开发中突然想到的需求
+- 用户提出的零散想法
+- 任何不想立即开发但不想丢失的点子
+- 用户说"记录一下"、"先记下来"
+
+## When NOT to Use
+
+- 想立即开发 → 用 `/dev`
+- 修复 bug → 用 `/fix`
+- 只是想讨论想法 → 直接对话，不需要文件记录
+
 ## 命令格式
 
 ```
 /issue                          ← 手动输入需求
 /issue 需求简要描述             ← 带描述的手动输入
-/issue --from-branch            ← 从当前 git 分支名提取需求信息
 ```
 
 ## 用途
@@ -20,35 +32,62 @@ description: 需求捕获 — 快速记录需求到 docs/issue/
 - 开发中突然想到的需求
 - 用户提出的零散想法
 - 任何不想立即开发但不想丢失的点子
-- 从当前开发分支提取需求信息（`--from-branch`）
+
+## 文件命名
+
+```
+issue-{MMDD}{序号}-{中文描述}.md
+```
+
+- `MMDD`：创建日期（月日）
+- `{序号}`：同一天内的序号（2位，从01开始）
+- `{中文描述}`：语义化的中文描述
+
+**示例：**
+
+- `issue-062305-请求错误处理.md`
+- `issue-062301-消息通知图标.md`
+
+## Frontmatter
+
+```yaml
+---
+id: issue-062301
+title: 导航栏消息通知功能
+priority: medium
+status: open
+tags: [导航栏, 消息通知]
+keywords: [未读数量, 通知图标]
+summary: |
+  在导航栏添加消息通知图标，
+  支持未读消息数量显示和点击跳转
+---
+```
+
+**字段说明：**
+
+- `id`：与文件名一致（不含 `.md`）
+- `priority`：high / medium / low
+- `status`：open / dev / archive / spec
+- `tags`：业务分类标签
+- `keywords`：搜索关键词
+- `summary`：一句话摘要（放最后，因为内容较长）
 
 ## Issue 文件模板
 
-```
-docs/issue/
-├── README.md                   ← 索引（自动维护）
-├── REQ-001-功能描述.md         ← 带需求编号（无 issue- 前缀）
-├── issue-001-功能描述.md       ← 自增编号（有 issue- 前缀）
-└── ...
-```
-
-**issue 文件**：
-
 ```markdown
 ---
-id: {id}  # 带需求编号：REQ-001；自增编号：issue-001
+id: issue-062301
 title: 需求标题
-priority: high | medium | low
-created: YYYY-MM-DD
-tags: []  # 可选，如：[用户管理, 登录]
-keywords: []  # 可选，如：[认证, 安全, OAuth]
+priority: medium
+status: open
+tags: []
+keywords: []
+summary: |
+  一句话描述需求的核心内容
 ---
 
-# {需求标题}
-
-## 背景
-
-为什么需要这个功能（可选）
+# 需求标题
 
 ## 需求描述
 
@@ -64,36 +103,45 @@ keywords: []  # 可选，如：[认证, 安全, OAuth]
 
 ### 捕获
 
-**手动模式**（默认）：
-
 1. 如果命令带了描述，直接用作需求标题；否则询问用户
 2. 询问或推断 priority（默认 medium）
 3. 确定 issue ID：
-   - 用户提供了需求编号 → 直接使用
-   - 未提供 → 扫描 `docs/issue/` 现有文件，取最大编号 + 1
-4. 根据需求描述自动推断 tags 和 keywords（用户可修改）
-5. 创建 issue 文件
-6. 更新 `docs/issue/README.md` 索引，追加条目
-7. 向用户确认创建成功
+   - 获取当前日期（MMDD）
+   - 扫描 `docs/issue/` 现有文件，找到同一天的最大序号 + 1
+   - 格式：`issue-{MMDD}{序号}`
+4. 生成中文描述（从标题提取关键词）
+5. 根据需求描述自动推断 tags 和 keywords（用户可修改）
+6. 生成 summary（一句话摘要）
+7. 创建 issue 文件
+8. 更新 `docs/issue/README.md` 索引
+9. 向用户确认创建成功
 
-**分支提取模式**（`--from-branch`）：
+### 索引维护
 
-1. 获取当前 git 分支名
-2. 解析分支名，提取需求编号和标题（常见格式：`feature/REQ-001-用户登录`、`feat/issue-001-用户登录`、`fix/BUG-001-登录失败`）
-3. 向用户展示解析结果，确认是否正确
-4. 确认后创建 issue 文件，使用解析出的需求编号作为 ID
-5. 更新 `docs/issue/README.md` 索引
-6. 向用户确认创建成功
+`docs/issue/README.md` 按优先级分组：
 
-### ID 规则
+```markdown
+# 需求待办
 
-**带需求编号**（用户提供了需求编号，如 `REQ-001`、`需求-42`）：
-- 直接使用需求编号作为 issue ID
-- 文件名：`{需求编号}-{kebab-case-slug}.md`
-- 示例：`REQ-001-用户登录.md`
+## High
 
-**不带需求编号**（用户只描述需求，未提供编号）：
-- 自动分配自增编号，格式：`issue-{三位数字}`
-- 扫描 `docs/issue/` 现有文件，取最大编号 + 1
-- 文件名：`issue-{id}-{kebab-case-slug}.md`
-- 示例：`issue-001-用户登录.md`
+- [ ] [issue-062305](issue-062305-请求错误处理.md) — request 内部错误处理优化
+
+## Medium
+
+- [ ] [issue-062301](issue-062301-消息通知图标.md) — 导航栏消息通知
+
+## Low
+
+- [ ] [issue-062203](issue-062203-文案系统.md) — 文案系统设计
+```
+
+当 issue 状态变为 `dev` 时，从索引中移除（由 `/dev` skill 处理）。
+
+## Verification
+
+完成的证据：
+
+- [ ] issue 文件已创建，frontmatter 字段完整
+- [ ] `docs/issue/README.md` 索引已更新
+- [ ] 用户确认创建成功
